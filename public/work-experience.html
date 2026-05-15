@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Work Experience — Manoj Jacob, Executive Creative Director.">
+  <title>Work Experience — Manoj Jacob</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="subpage">
+    <a href="index.html#everything-else" class="subpage__back subpage__back--standalone" id="back-home">
+      <span class="subpage__back-arrow">←</span> back
+    </a>
+
+    <main class="subpage__body">
+      <h1 class="subpage__heading fade-in" id="page-heading">Work Experience</h1>
+      <p class="subpage__subtitle fade-in">coming soon</p>
+    </main>
+
+    <footer class="footer">
+      <p class="footer__text">&copy; 2026 Manoj Jacob. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-in').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 100);
+      });
+    });
+  </script>
+
+</body>
+</html>

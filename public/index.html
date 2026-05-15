@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Manoj Jacob — Executive Creative Director. Portfolio showcasing creative work, brand strategy, and design leadership.">
+  <title>Manoj Jacob — Executive Creative Director</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="hero">
+    <div class="hero__image-logo fade-in">
+      <img src="image/head.jpg" alt="Manoj Jacob Logo">
+    </div>
+    <nav class="hero__nav fade-in">
+      <a href="work.html" class="hero__nav-link" id="nav-the-work">the work</a>
+      <a href="profile.html" class="hero__nav-link" id="nav-everything-else">everything else</a>
+    </nav>
+  </section>
+
+
+
+  <!-- ========== SCROLL ANIMATIONS ========== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Intersection Observer for scroll-triggered animations
+      const animatedElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .stagger-children');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      animatedElements.forEach(el => observer.observe(el));
+    });
+  </script>
+
+</body>
+
+</html>

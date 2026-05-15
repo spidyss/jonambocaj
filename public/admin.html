@@ -1,0 +1,4424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Manoj Jacob Portfolio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;700&family=Lora:wght@400;700&family=Poppins:wght@300;400;500;700&display=swap">
+  <style>
+    /* Local Gotham family — needed in admin so the font picker can preview them too */
+    @font-face {
+      font-family: 'Gotham';
+      src: url('./fonts/gotham.otf') format('opentype');
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Gotham Book';
+      src: url('./fonts/Gotham Book.otf') format('opentype');
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Gotham Regular';
+      src: url('./fonts/Gotham Regular.otf') format('opentype');
+      font-display: swap;
+    }
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Gotham', sans-serif;
+      background: #f5f6f8;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* --- Login --- */
+    .login-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    .login-card h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .login-card p {
+      font-size: .85rem;
+      color: #6b7280;
+      margin-bottom: 32px;
+    }
+
+    .login-card label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .login-card input[type="text"],
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      color: #111;
+      font-size: .95rem;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border .3s;
+    }
+
+    .login-card input:focus {
+      border-color: #111;
+    }
+
+    .login-card button {
+      width: 100%;
+      padding: 14px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .3s;
+    }
+
+    .login-card button:hover {
+      opacity: .85;
+    }
+
+    .login-error {
+      color: #e74c3c;
+      font-size: .8rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* --- Dashboard Layout --- */
+    .admin-wrap {
+      display: none;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 32px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* When the editor is open, hide the global Work Management header — the editor's own
+       sticky toolbar (with View Site / Preview / Draft / Publish / Logout) takes its place
+       and stays visible no matter how far you scroll. */
+    body.is-editor-open .admin-header { display: none; }
+
+    .admin-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .admin-header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .3s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #000;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-ghost:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: .8rem;
+    }
+
+    /* --- Toolbar (Sort + Tile Size) --- */
+    .works-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toolbar-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .toolbar-select {
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      color: #111;
+      border-radius: 8px;
+      font-size: .85rem;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border .2s;
+    }
+
+    .toolbar-select:hover,
+    .toolbar-select:focus {
+      border-color: #111;
+    }
+
+    .size-buttons {
+      display: inline-flex;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .size-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+
+    .size-btn:hover {
+      color: #111;
+    }
+
+    .size-btn.active {
+      background: #111;
+      color: #fff;
+    }
+
+    .toolbar-hint {
+      font-size: .72rem;
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    /* --- Works List --- */
+    .works-list {
+      padding: 32px;
+    }
+
+    .works-list h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 16px;
+    }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--tile-min, 280px), 1fr));
+      gap: var(--tile-gap, 20px);
+    }
+
+    /* ---- Work Card ---- */
+    .work-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .work-card:hover {
+      border-color: #d1d5db;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+    }
+
+    .work-card[draggable="true"] {
+      cursor: grab;
+    }
+
+    .work-card[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .work-card.__drag-over {
+      border-color: #111;
+      background: #f9fafb;
+    }
+
+    .work-card.__no-drag {
+      cursor: default;
+    }
+
+    /* Image area with hover overlay */
+    .work-card__img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+
+    .work-card__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .35s ease;
+    }
+
+    .work-card:hover .work-card__img {
+      transform: scale(1.04);
+    }
+
+    /* Action overlay — appears on hover over the image */
+    .work-card__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.18) 55%, transparent 100%);
+      opacity: 0;
+      transition: opacity .25s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .work-card:hover .work-card__overlay {
+      opacity: 1;
+    }
+
+    .ov-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+      border: none;
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+      font-family: inherit;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .ov-btn--edit {
+      background: rgba(255, 255, 255, 0.95);
+      color: #111;
+    }
+
+    .ov-btn--edit:hover {
+      background: #fff;
+    }
+
+    .ov-btn--unpub {
+      background: rgba(251, 191, 36, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+
+    .ov-btn--unpub:hover {
+      background: rgba(251, 191, 36, 0.28);
+    }
+
+    .ov-btn--repub {
+      background: rgba(34, 197, 94, 0.18);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .ov-btn--repub:hover {
+      background: rgba(34, 197, 94, 0.28);
+    }
+
+    .ov-btn--delete {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      margin-left: auto;
+    }
+
+    .ov-btn--delete:hover {
+      background: rgba(239, 68, 68, 0.28);
+    }
+
+    /* XS: icon-only buttons */
+    .works-grid.size-xs .ov-btn span.btn-label {
+      display: none;
+    }
+
+    .works-grid.size-xs .ov-btn {
+      padding: 6px 8px;
+      font-size: .75rem;
+      gap: 0;
+    }
+
+    .works-grid.size-xs .work-card__overlay {
+      padding: 8px;
+      gap: 4px;
+    }
+
+    /* SM: shorter labels */
+    .works-grid.size-sm .ov-btn {
+      padding: 5px 8px;
+      font-size: .67rem;
+    }
+
+    /* Card body — clean, no action buttons */
+    .work-card__body {
+      padding: 10px 12px 12px;
+    }
+
+    .work-card__title {
+      font-size: .88rem;
+      font-weight: 600;
+      color: #111;
+      line-height: 1.35;
+      margin: 0;
+      /* Single-line ellipsis. Fixed height so a long title can never grow the card. */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      min-width: 0;
+    }
+    /* Anything inside the title (font spans, color spans, br, …) is forced inline + visible
+       only on one line. <br> would otherwise force a wrap and grow the card. */
+    .work-card__title * {
+      display: inline !important;
+      white-space: nowrap !important;
+    }
+    .work-card__title br { display: none !important; }
+
+    .work-card__meta {
+      font-size: .68rem;
+      color: #b0b7c3;
+      margin-top: 4px;
+    }
+
+    .work-card__title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .work-card__title-row .work-card__title {
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+
+    /* Compact tile sizes */
+    .works-grid.size-sm .work-card__body {
+      padding: 8px 10px 10px;
+    }
+
+    .works-grid.size-sm .work-card__title {
+      font-size: .78rem;
+    }
+
+    .works-grid.size-sm .work-card__meta {
+      font-size: .65rem;
+      margin-top: 3px;
+    }
+
+    .works-grid.size-xs .work-card__body {
+      padding: 7px 9px 9px;
+    }
+
+    .works-grid.size-xs .work-card__title {
+      font-size: .72rem;
+    }
+
+    .works-grid.size-xs .work-card__meta {
+      display: none;
+    }
+
+    /* On XS, stack badge on its own line above the title so nothing wraps */
+    .works-grid.size-xs .work-card__title-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .works-grid.size-xs .status-badge {
+      font-size: .55rem;
+      padding: 1px 6px;
+    }
+
+    .works-grid.size-xs .ov-btn {
+      padding: 5px 8px;
+      font-size: .65rem;
+      gap: 3px;
+    }
+
+    /* On SM, also keep badge compact */
+    .works-grid.size-sm .status-badge {
+      font-size: .58rem;
+      padding: 2px 6px;
+    }
+
+    .works-grid.size-sm .ov-btn {
+      padding: 5px 9px;
+      font-size: .68rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #9ca3af;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    /* Search input */
+    .search-input {
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      color: #111;
+      border-radius: 8px;
+      font-size: .85rem;
+      outline: none;
+      min-width: 220px;
+      font-family: inherit;
+      transition: border .2s;
+    }
+
+    .search-input:focus {
+      border-color: #111;
+    }
+
+    /* Tile click affordance */
+    .work-card__clickable {
+      cursor: pointer;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      vertical-align: middle;
+    }
+
+    .status-badge.draft {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .status-badge.published {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-badge.unpublished {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    /* status badge base */
+
+    /* Editor header bar */
+    .editor-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: -32px -32px 24px;        /* break out of editor-wrap padding fully */
+      padding: 10px 20px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 50;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      min-height: 52px;
+    }
+    .editor-header h3 { font-size: .95rem; font-weight: 600; }
+    .editor-header .btn { padding: 6px 12px; font-size: .78rem; }
+    .editor-header .btn-sm { padding: 6px 10px; font-size: .75rem; }
+    .editor-header .back-btn {
+      width: 32px; height: 32px;
+      padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+    .editor-header__left { gap: 10px; min-height: 32px; }
+
+    .editor-header__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 40px;
+    }
+
+    .editor-header h3 {
+      margin: 0;
+      line-height: 1;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+      line-height: 1;
+      height: 38px;
+    }
+
+    .back-btn:hover {
+      border-color: #111;
+      color: #111;
+      background: #f9fafb;
+    }
+
+    .back-btn:active {
+      transform: translateY(1px);
+    }
+
+    #editorStatusBadge {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Image block caption input */
+    .block-caption-input {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: .85rem;
+      color: #1a1a1a;
+      outline: none;
+      font-family: inherit;
+      transition: border .2s;
+    }
+
+    .block-caption-input:focus {
+      border-color: #111;
+    }
+
+    /* Gallery / collage block — visually distinct from single image */
+    .block.block--gallery {
+      border-color: #a855f7;
+      background: #faf5ff;
+    }
+
+    .block--gallery .block-type-label {
+      color: #7c3aed;
+    }
+
+    .gallery-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .gallery-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .gallery-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .gallery-grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-item-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      cursor: pointer;
+      font-size: .8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .gallery-item-remove:hover {
+      background: #e74c3c;
+    }
+
+    .gallery-add {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      aspect-ratio: 1;
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      background: #fafbfc;
+      cursor: pointer;
+      color: #9ca3af;
+      font-size: .75rem;
+      position: relative;
+      transition: border .2s;
+    }
+
+    .gallery-add:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .gallery-add input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* --- Editor --- */
+    .editor-wrap {
+      display: none;
+      padding: 32px;
+      max-width: 1200px;            /* widened from 800px so side-by-side rows have room to breathe */
+      margin: 0 auto;
+    }
+
+    .editor-wrap h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      color: #111;
+      font-size: 1rem;
+      outline: none;
+      transition: border .3s;
+    }
+
+    .form-group input[type="text"]:focus {
+      border-color: #111;
+    }
+
+    /* Tile image upload */
+    .tile-upload {
+      position: relative;
+      width: 200px;
+      aspect-ratio: 1;
+      background: #fff;
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color .3s;
+    }
+
+    .tile-upload:hover {
+      border-color: #111;
+    }
+
+    .tile-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .tile-upload img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .remove-tile-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .remove-tile-btn:hover {
+      background: #e74c3c;
+    }
+
+    .tile-upload span {
+      font-size: .8rem;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .tile-upload .icon {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+      pointer-events: none;
+    }
+
+    /* Content blocks */
+    .content-blocks {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* Tighter, calmer block toolbars: smaller controls, less colour noise.
+       Every control here uses the SAME row height (30px) so the toolbar reads as one clean
+       horizontal strip, with min-widths (not fixed widths) so text labels never wrap. */
+    .gallery-controls {
+      background: #fafafa;
+      border: 1px solid #f1f3f5;
+      border-radius: 8px;
+      padding: 8px 10px;
+      gap: 8px;
+      font-size: .75rem;
+    }
+    .gallery-controls .toolbar-label {
+      font-size: .65rem;
+      color: #6b7280;
+      letter-spacing: .04em;
+    }
+    .size-buttons { padding: 2px; }
+    .size-btn { padding: 4px 9px; font-size: .72rem; }
+
+    .editor-toolbar {
+      background: #fafafa;
+      border: 1px solid #f1f3f5;
+      border-radius: 8px 8px 0 0;
+      gap: 4px;
+      padding: 6px 8px;
+      align-items: center;
+    }
+    /* All toolbar controls share the same height + sizing rules so heights stay aligned. */
+    .editor-tool,
+    .editor-size-select,
+    .editor-color-picker {
+      height: 30px;
+      font-size: .75rem;
+      box-sizing: border-box;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    /* Icon-only buttons (B / I / U / S / alignment SVGs) — square. Use min-width so a button
+       with a slightly wider glyph (e.g. SVG) doesn't get clipped. */
+    .editor-tool {
+      min-width: 30px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .editor-tool svg { display: block; }
+    .editor-size-select { padding: 0 24px 0 10px; min-width: 70px; }
+    .editor-color-picker { width: 30px; padding: 2px; }
+    /* Color swatch row sits inline with the rest of the toolbar at the same height. */
+    .color-swatches { display: inline-flex; gap: 4px; align-items: center; }
+    .color-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.08);
+      cursor: pointer;
+      padding: 0;
+      transition: transform .15s ease;
+    }
+    .color-swatch:hover { transform: scale(1.12); }
+    .editor-divider { height: 22px; align-self: center; }
+    .word-count {
+      margin-left: auto;
+      align-self: center;
+      font-size: .7rem;
+      color: #9ca3af;
+      padding-right: 4px;
+    }
+
+    .block-type-label {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    .block { padding: 14px 14px 14px 48px; }
+
+    .block {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px 16px 16px 52px;
+      position: relative;
+      transition: opacity .2s, border-color .2s;
+    }
+
+    /* WYSIWYG-ish row container: shows merged blocks actually side-by-side,
+       mirroring how the public detail page will lay them out. Stretches to use the
+       full editor width — no roomy padding, no extra background panel. */
+    .editor-row {
+      display: flex;
+      gap: 18px;
+      align-items: stretch;
+      margin: 22px 0 22px;
+      padding: 0;
+      background: transparent;
+      border: 1px dashed #93c5fd;
+      border-radius: 10px;
+      padding: 6px;
+      position: relative;
+    }
+    .editor-row::before {
+      content: '⇆ Side-by-side · ' attr(data-cols) ' columns';
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background: #2563eb;
+      color: #fff;
+      font-size: .6rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .editor-row > .block {
+      flex: 1 1 0;
+      min-width: 0;
+      margin-bottom: 0 !important;
+      /* Slim the drag-handle gutter inside rows so each column has room to breathe. */
+      padding: 14px 14px 14px 38px;
+    }
+    /* Drag handle stays in its column, just smaller */
+    .editor-row > .block .block-drag-handle {
+      width: 22px;
+      height: 22px;
+      left: 8px;
+      top: 10px;
+    }
+    /* Hide the standalone "is-in-row" floating badge — the wrapper already says it */
+    .editor-row > .block.is-in-row::before { display: none; }
+    .editor-row > .block.is-in-row { border-left: 1px solid #e5e7eb; margin-left: 0; }
+    /* Inside a row, prevent block controls from stacking onto two lines for narrow columns */
+    .editor-row > .block .block-controls { gap: 4px; }
+    .editor-row > .block .block-controls button { min-width: 24px; height: 24px; padding: 0 6px; font-size: .7rem; }
+    .editor-row > .block .block-controls .btn-row { padding: 0 6px; font-size: .65rem; }
+    /* Inner toolbars in a side-by-side column also shrink slightly so the row doesn't overflow. */
+    .editor-row > .block .editor-tool,
+    .editor-row > .block .editor-size-select,
+    .editor-row > .block .editor-color-picker { height: 26px; font-size: .7rem; }
+    .editor-row > .block .editor-tool { min-width: 26px; padding: 0 6px; }
+    .editor-row > .block .editor-size-select { min-width: 56px; padding: 0 18px 0 6px; }
+    .editor-row > .block .color-swatch { width: 18px; height: 18px; }
+
+    @media (max-width: 720px) {
+      .editor-row { flex-direction: column; }
+    }
+
+    .block.__drag-over {
+      border-color: #111;
+      background: #f9fafb;
+    }
+
+    .block.__dragging {
+      opacity: .4;
+    }
+
+    /* Drag handle (only this part is draggable, so text selection works) */
+    .block-drag-handle {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #9ca3af;
+      border-radius: 6px;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .block-drag-handle:hover {
+      border-color: #111;
+      color: #111;
+      background: #f3f4f6;
+    }
+
+    .block-drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .block-controls {
+      display: flex;
+      gap: 6px;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .block-controls button {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #6b7280;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+    }
+
+    .block-controls button:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .block-controls .btn-row {
+      width: auto;
+      padding: 0 10px;
+      font-size: .7rem;
+      font-weight: 500;
+    }
+
+    /* Visual cue when block is side-by-side with previous one */
+    .block.is-in-row {
+      border-left: 3px solid #2563eb;
+      margin-left: 12px;
+    }
+    .block.is-in-row::before {
+      content: '⇆ in row';
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background: #2563eb;
+      color: #fff;
+      font-size: .65rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .block-type-label {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    /* Text Editor */
+    .text-editor {
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      gap: 2px;
+      padding: 10px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      flex-wrap: wrap;
+    }
+
+    .editor-tool {
+      padding: 6px 10px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: .75rem;
+      font-weight: 500;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .editor-tool:hover {
+      border-color: #111;
+      color: #111;
+      background: #f3f4f6;
+    }
+
+    .editor-tool.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .editor-size-select {
+      padding: 6px 8px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      border-radius: 4px;
+      font-size: .75rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .editor-size-select:hover {
+      border-color: #111;
+    }
+
+    .editor-size-select:focus {
+      border-color: #111;
+    }
+
+    .editor-color-picker {
+      width: 32px;
+      height: 32px;
+      padding: 2px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .editor-color-picker:hover {
+      border-color: #111;
+    }
+
+    .editor-divider {
+      width: 1px;
+      background: #e5e7eb;
+      margin: 0 2px;
+    }
+
+    .editor-content {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      background: #fff;
+      border: none;
+      color: #1a1a1a;
+      font-size: .95rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      word-wrap: break-word;
+      /* Preserve every space, tab, and blank line the user types — so multiple spaces
+         and indented lines from a paste round-trip to the frontend exactly. */
+      white-space: pre-wrap;
+      white-space: pre-wrap;
+      cursor: text;
+    }
+
+    .editor-content * {
+      cursor: text;
+    }
+
+    .editor-content:focus {
+      outline: none;
+    }
+
+    .editor-content:empty:before {
+      content: attr(data-placeholder);
+      color: #9ca3af;
+    }
+
+    .editor-content strong {
+      font-weight: 600;
+    }
+
+    .editor-content em {
+      font-style: italic;
+    }
+
+    .editor-content u {
+      text-decoration: underline;
+    }
+
+    .editor-content span[data-text-size="small"] {
+      font-size: 0.85em;
+    }
+
+    .editor-content span[data-text-size="large"] {
+      font-size: 1.25em;
+    }
+
+    .editor-content span[data-text-size="xl"] {
+      font-size: 1.5em;
+    }
+
+    .editor-content h2 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      margin: 15px 0 8px 0;
+      color: #111;
+    }
+
+    .editor-content h3 {
+      font-weight: 600;
+      font-size: 1.4rem;
+      margin: 12px 0 6px 0;
+      color: #111;
+    }
+
+    .editor-content h4 {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 10px 0 4px 0;
+      color: #111;
+    }
+
+    .editor-content ul,
+    .editor-content ol {
+      margin: 8px 0 8px 28px;
+      padding-left: 8px;
+    }
+
+    .editor-content ul li,
+    .editor-content ol li {
+      margin: 4px 0;
+    }
+
+    .editor-content a {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    .editor-content s,
+    .editor-content strike {
+      text-decoration: line-through;
+    }
+
+    /* Color swatches */
+    .color-swatches {
+      display: inline-flex;
+      gap: 3px;
+      padding: 0 4px;
+    }
+
+    .color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+      padding: 0;
+      transition: transform .15s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.15);
+      border-color: #111;
+    }
+
+    .word-count {
+      margin-left: auto;
+      font-size: .7rem;
+      color: #9ca3af;
+      padding: 6px 8px;
+    }
+
+    .block textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      background: #fff;
+      border: none;
+      color: #1a1a1a;
+      font-size: .95rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      transition: border .3s;
+    }
+
+    .block textarea:focus {
+      border-color: #111;
+    }
+
+    .block-img-upload {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s;
+    }
+
+    .block-img-upload:hover {
+      border-color: #111;
+    }
+
+    .block-img-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .block-img-upload img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .block-img-upload span {
+      font-size: .8rem;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .add-block-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    /* Responsive */
+    @media(max-width:600px) {
+
+      .works-list,
+      .editor-wrap {
+        padding: 20px;
+      }
+
+      .works-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-header {
+        padding: 16px 20px;
+      }
+
+      .works-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #111;
+      border: 1px solid #111;
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: .85rem;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .3s;
+      pointer-events: none;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      background: #e74c3c;
+      border-color: #e74c3c;
+    }
+
+    /* ============ PREVIEW MODAL ============ */
+    .preview-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0, 0, 0, 0.85);
+      flex-direction: column;
+    }
+
+    .preview-modal.open {
+      display: flex;
+    }
+
+    .preview-modal__bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      background: #111;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .preview-modal__bar span {
+      font-size: .85rem;
+      color: #aaa;
+      flex: 1;
+    }
+
+    .preview-modal__bar .preview-badge {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #fbbf24;
+      color: #111;
+    }
+
+    .preview-modal__close {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-family: inherit;
+      transition: all .2s;
+    }
+
+    .preview-modal__close:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-modal__viewport-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .viewport-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #aaa;
+      padding: 7px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: .75rem;
+      font-family: inherit;
+      transition: all .2s;
+    }
+
+    .viewport-btn.active,
+    .viewport-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .preview-modal__frame-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    .preview-modal__frame {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      transition: width .3s ease, height .3s ease;
+      width: 100%;
+      max-width: 1080px;
+    }
+
+    .preview-modal__frame.mobile {
+      max-width: 390px;
+      height: 844px;
+      border-radius: 28px;
+    }
+
+    .preview-modal__frame.tablet {
+      max-width: 768px;
+    }
+
+    #previewIframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      min-height: 700px;
+    }
+
+    /* ============ DUPLICATE BUTTON ============ */
+    .ov-btn--duplicate {
+      background: rgba(99, 102, 241, 0.18);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .ov-btn--duplicate:hover {
+      background: rgba(99, 102, 241, 0.28);
+    }
+
+    /* ============ STATS BAR ============ */
+    .editor-stats-bar {
+      display: flex;
+      gap: 20px;
+      padding: 10px 0 18px;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: .75rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .stat-chip strong {
+      color: #111;
+    }
+
+    /* ============ VIDEO BLOCK ============ */
+    .block.block--video {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .block--video .block-type-label {
+      color: #1d4ed8;
+    }
+
+    .video-url-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .9rem;
+      outline: none;
+      font-family: inherit;
+      color: #111;
+      transition: border .2s;
+      margin-bottom: 8px;
+    }
+
+    .video-url-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .video-preview-thumb {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: .8rem;
+      margin-top: 8px;
+    }
+
+    .video-preview-thumb iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ============ DIVIDER BLOCK ============ */
+    .block.block--divider {
+      border-color: #e5e7eb;
+      background: #fafafa;
+      padding: 14px 14px 14px 52px;
+    }
+
+    .block--divider .block-type-label {
+      color: #9ca3af;
+    }
+
+    .divider-preview {
+      border: none;
+      border-top: 2px solid #e5e7eb;
+      margin: 10px 0 4px;
+    }
+
+    .divider-style-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .divider-style-btn {
+      padding: 5px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: .72rem;
+      font-family: inherit;
+      color: #6b7280;
+      transition: all .2s;
+    }
+
+    .divider-style-btn.active,
+    .divider-style-btn:hover {
+      border-color: #111;
+      color: #111;
+      background: #f3f4f6;
+    }
+
+    /* ============ QUOTE BLOCK ============ */
+    .block.block--quote {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+    }
+
+    .block--quote .block-type-label {
+      color: #b45309;
+    }
+
+    .quote-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-style: italic;
+      outline: none;
+      font-family: inherit;
+      color: #111;
+      background: #fff;
+      transition: border .2s;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 6px;
+    }
+
+    .quote-input:focus {
+      border-color: #f59e0b;
+    }
+
+    .quote-attr-input {
+      width: 100%;
+      padding: 8px 14px;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      font-size: .85rem;
+      outline: none;
+      font-family: inherit;
+      color: #666;
+      background: #fff;
+      transition: border .2s;
+    }
+
+    .quote-attr-input:focus {
+      border-color: #f59e0b;
+    }
+
+    /* ============ DUPLICATE BLOCK ============ */
+    .block-controls button.btn-duplicate {
+      color: #6366f1;
+    }
+
+    .block-controls button.btn-duplicate:hover {
+      border-color: #6366f1;
+    }
+
+    /* ============ SHORTCUT HINT ============ */
+    .shortcut-hint {
+      font-size: .68rem;
+      color: #9ca3af;
+      padding: 8px 0 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .shortcut-hint kbd {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .65rem;
+      color: #374151;
+      font-family: monospace;
+    }
+
+    /* ============ COVER ASPECT RATIO ============ */
+    .tile-aspect-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .aspect-btn {
+      padding: 5px 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: .72rem;
+      font-family: inherit;
+      color: #6b7280;
+      transition: all .2s;
+    }
+
+    .aspect-btn.active,
+    .aspect-btn:hover {
+      border-color: #111;
+      color: #111;
+      background: #f3f4f6;
+    }
+
+    /* ============ BG COLOR SWATCHES ============ */
+    .bg-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+      padding: 0;
+    }
+    .bg-swatch:hover {
+      transform: scale(1.18);
+      border-color: #111 !important;
+    }
+
+    /* ============ SECTION LABEL BLOCK ============ */
+    .block.block--label {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .block--label .block-type-label {
+      color: #059669;
+    }
+
+    .section-label-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      outline: none;
+      font-family: inherit;
+      color: #111;
+      background: #fff;
+      transition: border .2s;
+    }
+
+    .section-label-input:focus {
+      border-color: #10b981;
+    }
+
+    /* ============ WORK COUNT BADGE ============ */
+    .works-count-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: .72rem;
+      color: #6b7280;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN VIEW -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>Admin Panel</h1>
+      <p>Manoj Jacob Portfolio Management</p>
+      <div class="login-error" id="loginError">Invalid username or password</div>
+      <label for="loginUser">Username</label>
+      <input type="text" id="loginUser" autocomplete="username" placeholder="Enter username">
+      <label for="loginPass">Password</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="Enter password">
+      <button onclick="doLogin()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div class="admin-wrap" id="adminView">
+    <div class="admin-header">
+      <h2>Work Management <span class="works-count-badge" id="worksCountBadge">0 works</span></h2>
+      <div class="admin-header-actions">
+        <button class="btn btn-ghost" onclick="openPreviewSite()" title="Open live site in new tab">🌐 View
+          Site</button>
+        <button class="btn btn-primary" onclick="openEditor()">+ New Work</button>
+        <button class="btn btn-ghost" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Works list -->
+    <div class="works-list" id="worksList">
+      <h3>All Works</h3>
+
+      <div class="works-toolbar">
+        <div class="toolbar-group">
+          <span class="toolbar-label">Sort by</span>
+          <select class="toolbar-select" id="sortSelect" onchange="onSortChange(this.value)">
+            <option value="manual">Manual (drag &amp; drop)</option>
+            <option value="date-desc">Date — Newest first</option>
+            <option value="date-asc">Date — Oldest first</option>
+            <option value="title-asc">Title — A to Z</option>
+            <option value="title-desc">Title — Z to A</option>
+          </select>
+          <span class="toolbar-hint" id="sortHint">Drag tiles to reorder</span>
+        </div>
+
+        <div class="toolbar-group">
+          <span class="toolbar-label">Status</span>
+          <select class="toolbar-select" id="statusFilter" onchange="onStatusFilterChange(this.value)">
+            <option value="all">All</option>
+            <option value="published">Published</option>
+            <option value="draft">Drafts</option>
+            <option value="unpublished">Unpublished</option>
+          </select>
+        </div>
+
+        <div class="toolbar-group">
+          <input type="text" class="search-input" id="searchInput" placeholder="Search works…"
+            oninput="onSearchChange(this.value)">
+        </div>
+
+        <div class="toolbar-group">
+          <span class="toolbar-label">Tile size</span>
+          <div class="size-buttons" id="sizeButtons">
+            <button class="size-btn" data-size="xs" onclick="setTileSize('xs')">XS</button>
+            <button class="size-btn" data-size="sm" onclick="setTileSize('sm')">S</button>
+            <button class="size-btn active" data-size="md" onclick="setTileSize('md')">M</button>
+            <button class="size-btn" data-size="lg" onclick="setTileSize('lg')">L</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="works-grid size-md" id="worksGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <p>No works yet. Create your first one!</p>
+        <button class="btn btn-primary" onclick="openEditor()">+ New Work</button>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-wrap" id="editorView">
+      <div class="editor-header">
+        <div class="editor-header__left">
+          <button class="back-btn" onclick="cancelEditor()" title="Back to all works" aria-label="Back">←</button>
+          <h3 id="editorTitle">New Work</h3>
+          <span id="editorStatusBadge"></span>
+        </div>
+        <div style="display:flex; gap:6px; margin-left:auto; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="openPreviewSite()"
+            title="Open the public site in a new tab" aria-label="Open public site">🌐</button>
+          <button class="btn btn-ghost btn-sm" onclick="openLivePreview()"
+            title="Preview how this work looks publicly (Ctrl+P)" style="background:#fef3c7; border-color:#fde68a; color:#92400e;">👁 Preview</button>
+          <button class="btn btn-ghost btn-sm" onclick="saveWork('draft')"
+            title="Save as draft (Ctrl+D)">💾 Draft</button>
+          <button class="btn btn-primary btn-sm" onclick="saveWork('published')"
+            title="Publish (Ctrl+S)">Publish</button>
+          <button class="btn btn-ghost btn-sm" onclick="doLogout()" title="Sign out" aria-label="Sign out">⏻</button>
+        </div>
+      </div>
+
+      <!-- STATS BAR -->
+      <div class="editor-stats-bar" id="editorStatsBar">
+        <div class="stat-chip">📝 <strong id="statBlocks">0</strong> blocks</div>
+        <div class="stat-chip">🖼 <strong id="statImages">0</strong> images</div>
+        <div class="stat-chip">🔤 <strong id="statWords">0</strong> words</div>
+        <div class="stat-chip">📋 <strong id="statStatus">draft</strong></div>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <div class="text-editor" style="margin-bottom: 0;">
+          <div class="editor-toolbar" style="padding: 6px 10px;">
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('bold')"
+              title="Bold"><strong>B</strong></button>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('italic')"
+              title="Italic"><em>I</em></button>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()"
+              onclick="execTitle('underline')" title="Underline"><u>U</u></button>
+            <div class="editor-divider"></div>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('justifyLeft')" title="Align left">⬅</button>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('justifyCenter')" title="Center">⬌</button>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('justifyRight')" title="Align right">➡</button>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="execTitle('justifyFull')" title="Justify">☰</button>
+            <div class="editor-divider"></div>
+            <select class="editor-size-select" data-font-picker="title" onmousedown="event.stopPropagation()" onchange="setTitleFontFamily(this.value)" title="Font family"><option value="">Font</option></select>
+            <select class="editor-size-select" onmousedown="event.stopPropagation()" onchange="setTitleFontSize(this.value); this.value='';" title="Font size">
+              <option value="">Size</option>
+              <option value="">Default</option>
+              <option value="14">14px</option>
+              <option value="16">16px</option>
+              <option value="18">18px</option>
+              <option value="20">20px</option>
+              <option value="24">24px</option>
+              <option value="28">28px</option>
+              <option value="32">32px</option>
+              <option value="36">36px</option>
+              <option value="42">42px</option>
+              <option value="48">48px</option>
+              <option value="56">56px</option>
+              <option value="64">64px</option>
+              <option value="72">72px</option>
+              <option value="96">96px</option>
+            </select>
+            <div class="editor-divider"></div>
+            <input type="color" id="titleColor" class="editor-color-picker" value="#111111" title="Text color"
+              oninput="applyTitleColor(this.value)" onmousedown="event.stopPropagation()">
+            <div class="editor-divider"></div>
+            <button type="button" class="editor-tool" onmousedown="event.preventDefault()"
+              onclick="execTitle('removeFormat')" title="Clear formatting">⌫ Clear</button>
+          </div>
+          <div class="editor-content" id="workTitle" contenteditable="true"
+            style="min-height: 50px; font-size: 1.1rem; font-weight: 500;" onpaste="onEditorPaste(event, -1)"
+            data-placeholder="e.g. Brand Campaign for Nike"></div>
+        </div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+          <span class="toolbar-label">Block align</span>
+          <div class="size-buttons" id="titleAlignBtns">
+            <button type="button" class="size-btn" onclick="setTitleAlign('left')" data-val="left">⬅ Left</button>
+            <button type="button" class="size-btn active" onclick="setTitleAlign('center')" data-val="center">⬌ Center</button>
+            <button type="button" class="size-btn" onclick="setTitleAlign('right')" data-val="right">➡ Right</button>
+          </div>
+          <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; font-size:.8rem; color:#6b7280;">
+            <input type="checkbox" id="workTitleDivider" style="width:14px; height:14px; cursor:pointer;">
+            Show divider line under title
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cover Image (shown on the work grid)</label>
+        <div class="tile-upload" id="tileUpload">
+          <span class="icon">📷</span>
+          <span id="tileUploadText">Upload cover image</span>
+          <input type="file" id="tileInput" accept="image/*" onchange="previewTileImage(this)">
+          <img id="tilePreview" style="display:none;" alt="Tile preview">
+          <button type="button" id="removeTileBtn" class="remove-tile-btn" onclick="clearTileImage(event)"
+            style="display:none;">&times;</button>
+        </div>
+        <p style="font-size:.7rem; color:#9ca3af; margin-top:8px;">All tiles share the same aspect ratio across the site (16:10). Use the per-image Width controls inside the project content to size individual images.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="workSubtitle">Subtitle / Short Description <span style="font-weight:400; color:#9ca3af; font-size:.75rem;">(shown under the title on the tile and project page)</span></label>
+        <input type="text" id="workSubtitle" class="search-input" style="width:100%;" maxlength="300" placeholder="e.g. A multichannel brand campaign for Nike's 2026 launch">
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+          <span class="toolbar-label">Align</span>
+          <div class="size-buttons" id="subtitleAlignBtns">
+            <button type="button" class="size-btn" onclick="setSubtitleAlign('left')" data-val="left">⬅ Left</button>
+            <button type="button" class="size-btn active" onclick="setSubtitleAlign('center')" data-val="center">⬌ Center</button>
+            <button type="button" class="size-btn" onclick="setSubtitleAlign('right')" data-val="right">➡ Right</button>
+          </div>
+          <span class="toolbar-label">Size</span>
+          <div class="size-buttons" id="subtitleSizeBtns">
+            <button type="button" class="size-btn" onclick="setSubtitleSize('s')" data-val="s">S</button>
+            <button type="button" class="size-btn active" onclick="setSubtitleSize('m')" data-val="m">M</button>
+            <button type="button" class="size-btn" onclick="setSubtitleSize('l')" data-val="l">L</button>
+          </div>
+          <span class="toolbar-label">Font</span>
+          <select class="editor-size-select" id="subtitleFontSel" onchange="setSubtitleFont(this.value)" title="Subtitle font"></select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Visibility</label>
+        <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff;">
+          <input type="checkbox" id="workFeatured" style="width:16px; height:16px; cursor:pointer;">
+          <span style="font-size:.85rem; color:#374151;">⭐ Feature this work (pins to the top of the public grid)</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="workTags">Tags / Categories (comma separated)</label>
+        <input type="text" id="workTags" class="search-input" style="width:100%;" placeholder="e.g. Branding, Video, 2026">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+          <span class="toolbar-label">Align</span>
+          <div class="size-buttons" id="tagsAlignBtns" style="display:inline-flex;">
+            <button type="button" class="size-btn" onclick="setTagsAlign('left')" data-val="left">⬅ Left</button>
+            <button type="button" class="size-btn active" onclick="setTagsAlign('center')" data-val="center">⬌ Center</button>
+            <button type="button" class="size-btn" onclick="setTagsAlign('right')" data-val="right">➡ Right</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Page Background Color</label>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <input type="color" id="pageBgColor" value="#ffffff" title="Background color" oninput="setPageBgColor(this.value)"
+            style="width:44px; height:44px; border:2px solid #e0e0e0; border-radius:8px; cursor:pointer; padding:2px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="bg-swatch" style="background:#ffffff; border:1px solid #ccc;" onclick="setPageBgColor('#ffffff')" title="White"></button>
+            <button type="button" class="bg-swatch" style="background:#f8f8f8; border:1px solid #ccc;" onclick="setPageBgColor('#f8f8f8')" title="Off-white"></button>
+            <button type="button" class="bg-swatch" style="background:#1a1a1a;" onclick="setPageBgColor('#1a1a1a')" title="Dark"></button>
+            <button type="button" class="bg-swatch" style="background:#0a0a0a;" onclick="setPageBgColor('#0a0a0a')" title="Black"></button>
+            <button type="button" class="bg-swatch" style="background:#f5f0eb; border:1px solid #ccc;" onclick="setPageBgColor('#f5f0eb')" title="Warm cream"></button>
+            <button type="button" class="bg-swatch" style="background:#e8f0fe; border:1px solid #ccc;" onclick="setPageBgColor('#e8f0fe')" title="Soft blue"></button>
+            <button type="button" class="bg-swatch" style="background:#e6f4ea; border:1px solid #ccc;" onclick="setPageBgColor('#e6f4ea')" title="Soft green"></button>
+            <button type="button" class="bg-swatch" style="background:#fce8e6; border:1px solid #ccc;" onclick="setPageBgColor('#fce8e6')" title="Soft red"></button>
+          </div>
+          <span id="bgColorPreviewText" style="font-size:0.75rem; color:#888; font-family:monospace;">#ffffff</span>
+        </div>
+        <div id="bgColorPreviewBar" style="margin-top:10px; height:30px; border-radius:6px; border:1px solid #e0e0e0; background:#ffffff; transition:background 0.2s;"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Page Text Color <span style="color:#9ca3af; font-weight:400; font-size:.75rem;">(optional — leave empty to auto-detect from background)</span></label>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <input type="color" id="pageTextColor" value="#111111" title="Text color"
+            oninput="setPageTextColor(this.value)"
+            style="width:44px; height:44px; border:2px solid #e0e0e0; border-radius:8px; cursor:pointer; padding:2px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="setPageTextColor('')">Auto</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="setPageTextColor('#111111')">Dark</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="setPageTextColor('#f0f0f0')">Light</button>
+          <span id="textColorPreviewText" style="font-size:0.75rem; color:#888; font-family:monospace;">auto</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Page Content (add text &amp; images in any order)</label>
+        <div class="content-blocks" id="contentBlocks"></div>
+        <div class="add-block-bar" style="flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="addTextBlock()">+ Text</button>
+          <button class="btn btn-ghost btn-sm" onclick="addImageBlock()">+ Image</button>
+          <button class="btn btn-ghost btn-sm" onclick="addGalleryBlock()">+ Gallery</button>
+          <button class="btn btn-ghost btn-sm" onclick="addVideoBlock()" title="Embed YouTube or Vimeo">+ Video</button>
+          <button class="btn btn-ghost btn-sm" onclick="addQuoteBlock()" title="Add a pull quote">+ Quote</button>
+          <button class="btn btn-ghost btn-sm" onclick="addDividerBlock()" title="Add a visual divider">+
+            Divider</button>
+          <button class="btn btn-ghost btn-sm" onclick="addLabelBlock()" title="Add a section label">+ Section
+            Label</button>
+        </div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="btn btn-primary" onclick="saveWork('published')">Publish</button>
+        <button class="btn btn-ghost" onclick="saveWork('draft')">Save Draft</button>
+        <button class="btn btn-ghost" id="unpublishEditorBtn" style="display:none;color:#b45309;border-color:#fde68a;"
+          onclick="saveWork('unpublished')">Unpublish</button>
+        <button class="btn btn-ghost" onclick="openLivePreview()">👁 Preview</button>
+        <button class="btn btn-ghost" onclick="cancelEditor()">Cancel</button>
+      </div>
+      <div class="shortcut-hint">
+        <span><kbd>Ctrl+S</kbd> Save draft</span>
+        <span><kbd>Ctrl+Shift+S</kbd> Publish</span>
+        <span><kbd>Ctrl+P</kbd> Preview</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- PREVIEW MODAL -->
+  <div class="preview-modal" id="previewModal">
+    <div class="preview-modal__bar">
+      <span class="preview-badge">Preview</span>
+      <span id="previewTitle" style="flex:1; margin-left:10px;">—</span>
+      <div class="preview-modal__viewport-btns">
+        <button class="viewport-btn active" onclick="setViewport('desktop')" id="vp-desktop">🖥 Desktop</button>
+        <button class="viewport-btn" onclick="setViewport('tablet')" id="vp-tablet">⬜ Tablet</button>
+        <button class="viewport-btn" onclick="setViewport('mobile')" id="vp-mobile">📱 Mobile</button>
+      </div>
+      <button class="preview-modal__close" onclick="closePreview()">✕ Close</button>
+    </div>
+    <div class="preview-modal__frame-wrap">
+      <div class="preview-modal__frame" id="previewFrame">
+        <iframe id="previewIframe" title="Work Preview"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ STATE ============
+    let editingId = null;
+    let blocks = [];
+    let tileFile = null;
+    let tileRemoved = false;
+    let blockCounter = 0;
+    let allWorks = [];
+    let currentSort = localStorage.getItem('admin.sortMode') || 'manual';
+    let currentSize = localStorage.getItem('admin.tileSize') || 'md';
+    let currentStatusFilter = localStorage.getItem('admin.statusFilter') || 'all';
+    let currentSearch = '';
+    let editingStatus = 'published'; // status of the work being edited
+    let currentTileAspect = '16/10';
+    let currentTags = '';
+    let currentBgColor = '#ffffff';
+    let currentTextColor = '';
+    let currentTagsAlign = 'center';
+    let currentSubtitleAlign = 'center';
+    let currentSubtitleSize = 'm';
+    let currentTitleDivider = false;
+    let currentTitleAlign = 'center';
+    let currentSubtitleFont = '';
+    let currentTitleFont = '';
+
+    const RECENT_COLORS = ['#111111', '#e74c3c', '#2563eb', '#16a34a', '#f59e0b', '#a855f7'];
+
+    // Tile size -> grid minmax
+    const SIZE_MAP = {
+      xs: { min: '140px', gap: '10px' },
+      sm: { min: '200px', gap: '14px' },
+      md: { min: '280px', gap: '20px' },
+      lg: { min: '360px', gap: '24px' }
+    };
+
+    function setTileSize(size) {
+      if (!SIZE_MAP[size]) return;
+      currentSize = size;
+      localStorage.setItem('admin.tileSize', size);
+      const grid = document.getElementById('worksGrid');
+      grid.style.setProperty('--tile-min', SIZE_MAP[size].min);
+      grid.style.setProperty('--tile-gap', SIZE_MAP[size].gap);
+      grid.classList.remove('size-xs', 'size-sm', 'size-md', 'size-lg');
+      grid.classList.add('size-' + size);
+      document.querySelectorAll('#sizeButtons .size-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.size === size);
+      });
+    }
+
+    function onSortChange(mode) {
+      currentSort = mode;
+      localStorage.setItem('admin.sortMode', mode);
+      const hint = document.getElementById('sortHint');
+      hint.textContent = mode === 'manual' ? 'Drag tiles to reorder' : 'Drag disabled — switch to Manual to reorder';
+      renderWorks();
+    }
+
+    function sortedWorks() {
+      let arr = allWorks.slice();
+
+      // Filter by status
+      if (currentStatusFilter !== 'all') {
+        arr = arr.filter(w => (w.status || 'published') === currentStatusFilter);
+      }
+
+      // Filter by search
+      const q = (currentSearch || '').trim().toLowerCase();
+      if (q) {
+        arr = arr.filter(w => (w.title || '').toLowerCase().includes(q));
+      }
+
+      switch (currentSort) {
+        case 'date-desc':
+          return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        case 'date-asc':
+          return arr.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+        case 'title-asc':
+          return arr.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        case 'title-desc':
+          return arr.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+        case 'manual':
+        default:
+          return arr;
+      }
+    }
+
+    function onStatusFilterChange(value) {
+      currentStatusFilter = value;
+      localStorage.setItem('admin.statusFilter', value);
+      renderWorks();
+    }
+
+    function onSearchChange(value) {
+      currentSearch = value;
+      renderWorks();
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // ============ AUTH ============
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth-check');
+        const data = await res.json();
+        if (data.authenticated) { showAdmin(); }
+      } catch (e) { }
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('loginUser').value;
+      const password = document.getElementById('loginPass').value;
+      const errEl = document.getElementById('loginError');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (res.ok) { showAdmin(); }
+        else { errEl.style.display = 'block'; }
+      } catch (e) { errEl.style.display = 'block'; }
+    }
+
+    async function doLogout() {
+      await fetch('/api/logout', { method: 'POST' });
+      document.getElementById('adminView').style.display = 'none';
+      document.getElementById('loginView').style.display = 'flex';
+    }
+
+    function showAdmin() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('adminView').style.display = 'block';
+      // Restore persisted UI prefs
+      const sortSel = document.getElementById('sortSelect');
+      if (sortSel) sortSel.value = currentSort;
+      const statusSel = document.getElementById('statusFilter');
+      if (statusSel) statusSel.value = currentStatusFilter;
+      document.getElementById('sortHint').textContent = currentSort === 'manual'
+        ? 'Drag tiles to reorder'
+        : 'Drag disabled — switch to Manual to reorder';
+      setTileSize(currentSize);
+      loadWorks();
+      // Set initial history state
+      if (!window.history.state) {
+        window.history.replaceState({ view: 'list' }, '');
+      }
+    }
+
+    // Handle browser back button
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.view === 'editor') {
+        // Keep editor visible if we somehow navigated forward to it
+        document.getElementById('worksList').style.display = 'none';
+        document.getElementById('editorView').style.display = 'block';
+        document.body.classList.add('is-editor-open');
+      } else {
+        // Close editor for any other state (list or null)
+        document.getElementById('editorView').style.display = 'none';
+        document.getElementById('worksList').style.display = 'block';
+        document.body.classList.remove('is-editor-open');
+      }
+    });
+
+    // ============ WORKS LIST ============
+    async function loadWorks() {
+      const res = await fetch('/api/works?admin=true');
+      allWorks = await res.json();
+      renderWorks();
+    }
+
+    function renderWorks() {
+      const grid = document.getElementById('worksGrid');
+      const empty = document.getElementById('emptyState');
+
+      if (allWorks.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const isManual = currentSort === 'manual';
+      const works = sortedWorks();
+
+      // Update Header badge
+      const countBadge = document.getElementById('worksCountBadge');
+      if (countBadge) {
+        const pubCount = allWorks.filter(w => w.status === 'published').length;
+        countBadge.textContent = `${pubCount} published / ${allWorks.length} total`;
+      }
+
+      if (works.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>No works match the current filter.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = works.map(w => {
+        const status = w.status || 'published';
+        const cardClass = (isManual ? 'work-card' : 'work-card __no-drag') + ' work-card__clickable';
+        const dragAttrs = isManual
+          ? `draggable="true" ondragstart="dragStartWork(event, '${w.id}')" ondragover="dragOverWork(event)" ondrop="dragDropWork(event, '${w.id}')"`
+          : '';
+
+        const plainTitle = stripFormatting(w.title || '');
+        const unpubBtn = status === 'published'
+          ? `<button class="ov-btn ov-btn--unpub" onclick="event.stopPropagation(); quickUnpublish('${w.id}', this.dataset.title)" data-title="${escHtml(plainTitle)}">⊘ <span class="btn-label">Unpublish</span></button>`
+          : status === 'unpublished'
+            ? `<button class="ov-btn ov-btn--repub" onclick="event.stopPropagation(); quickRepublish('${w.id}', this.dataset.title)" data-title="${escHtml(plainTitle)}">↑ <span class="btn-label">Re-publish</span></button>`
+            : '';
+
+        // No-image fallback: plain stripped title, single line, ellipsis if too long.
+        // No fonts, no alignment, no styles from the project content — the tile is just an
+        // index of the work, not a place to render rich formatting.
+        const imgContent = w.tileImage
+          ? `<img class="work-card__img" src="${w.tileImage}" alt="${escHtml(plainTitle)}">`
+          : `<div class="work-card__img" style="display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#888;padding:14px;text-align:center;overflow:hidden;"><span style="display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82rem;font-family:'Gotham Book',sans-serif;">${escHtml(plainTitle || 'Untitled')}</span></div>`;
+
+        return `
+        <div class="${cardClass}" data-work-id="${w.id}" ${dragAttrs} onclick="onCardClick(event, '${w.id}')">
+          <div class="work-card__img-wrap">
+            ${imgContent}
+            <div class="work-card__overlay">
+              <button class="ov-btn ov-btn--edit" onclick="event.stopPropagation(); editWork('${w.id}')">✎ <span class="btn-label">Edit</span></button>
+              <button class="ov-btn ov-btn--duplicate" onclick="event.stopPropagation(); duplicateWork('${w.id}', this.dataset.title)" data-title="${escHtml(plainTitle)}">⧉ <span class="btn-label">Duplicate</span></button>
+              ${unpubBtn}
+              <button class="ov-btn ov-btn--delete" onclick="event.stopPropagation(); deleteWork('${w.id}', this.dataset.title)" data-title="${escHtml(plainTitle)}">✕ <span class="btn-label">Delete</span></button>
+            </div>
+          </div>
+          <div class="work-card__body">
+            <div class="work-card__title-row">
+              <p class="work-card__title">${escHtml(plainTitle || 'Untitled')}</p>
+              <span class="status-badge ${status}">${status}</span>
+            </div>
+            <div class="work-card__meta">${formatDate(w.createdAt)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function onCardClick(e, id) {
+      // Ignore clicks on action buttons (they handle their own logic)
+      if (e.target.closest('button')) return;
+      editWork(id);
+    }
+
+    let draggedWorkId = null;
+
+    function dragStartWork(e, id) {
+      draggedWorkId = id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.target.style.opacity = '0.5';
+    }
+
+    function dragOverWork(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function dragDropWork(e, targetId) {
+      e.preventDefault();
+      document.querySelectorAll('.work-card').forEach(el => el.style.opacity = '1');
+      if (!draggedWorkId || draggedWorkId === targetId || currentSort !== 'manual') {
+        draggedWorkId = null;
+        return;
+      }
+
+      const draggedIdx = allWorks.findIndex(w => w.id === draggedWorkId);
+      const targetIdx = allWorks.findIndex(w => w.id === targetId);
+      if (draggedIdx === -1 || targetIdx === -1) { draggedWorkId = null; return; }
+
+      const [moved] = allWorks.splice(draggedIdx, 1);
+      allWorks.splice(targetIdx, 0, moved);
+      renderWorks();
+
+      const newOrder = allWorks.map(w => w.id);
+      fetch('/api/works-order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: newOrder })
+      }).then(res => {
+        if (res.ok) toast('Order updated');
+        else toast('Failed to update order', true);
+      });
+
+      draggedWorkId = null;
+    }
+
+    async function deleteWork(id, title) {
+      if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+      const res = await fetch(`/api/works/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (res.ok) { toast('Work deleted'); loadWorks(); }
+      else { toast('Failed to delete', true); }
+    }
+
+    async function quickUnpublish(id, title) {
+      if (!confirm(`Unpublish "${title}"? It will no longer appear on the site.`)) return;
+      try {
+        const res = await fetch(`/api/works/${encodeURIComponent(id)}/unpublish`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.status === 'unpublished') {
+          toast('Work unpublished'); loadWorks();
+        } else {
+          toast('Failed to unpublish: ' + (data.error || 'unknown error'), true);
+          console.error('[unpublish] response:', data);
+        }
+      } catch (e) {
+        toast('Network error during unpublish', true);
+        console.error('[unpublish] error:', e);
+      }
+    }
+
+    async function quickRepublish(id, title) {
+      try {
+        const res = await fetch(`/api/works/${encodeURIComponent(id)}/publish`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.status === 'published') {
+          toast(`"${title}" is live again`); loadWorks();
+        } else {
+          toast('Failed to re-publish: ' + (data.error || 'unknown error'), true);
+          console.error('[republish] response:', data);
+        }
+      } catch (e) {
+        toast('Network error during re-publish', true);
+        console.error('[republish] error:', e);
+      }
+    }
+
+    // ============ EDITOR ============
+    function updateEditorStatusBadge() {
+      const badge = document.getElementById('editorStatusBadge');
+      const unpublishBtn = document.getElementById('unpublishEditorBtn');
+      if (!editingId) {
+        badge.innerHTML = '';
+        if (unpublishBtn) unpublishBtn.style.display = 'none';
+        return;
+      }
+      badge.innerHTML = `<span class="status-badge ${editingStatus}">${editingStatus}</span>`;
+      // Show Unpublish button only when editing a currently published work
+      if (unpublishBtn) {
+        unpublishBtn.style.display = editingStatus === 'published' ? 'inline-flex' : 'none';
+      }
+    }
+
+    function openEditor(id) {
+      editingId = null;
+      editingStatus = 'published';
+      blocks = [];
+      blockCounter = 0;
+      tileFile = null;
+      tileRemoved = false;
+      currentTileAspect = '16/10';
+      currentTags = '';
+      currentBgColor = '#ffffff';
+      currentTextColor = '';
+      currentTagsAlign = 'center';
+      currentSubtitleAlign = 'center';
+      currentSubtitleSize = 'm';
+      currentTitleDivider = false;
+      currentTitleAlign = 'center';
+      currentSubtitleFont = '';
+      currentTitleFont = '';
+      setPageTextColor('');
+      setTagsAlign('center');
+      setSubtitleAlign('center');
+      setSubtitleSize('m');
+      setTitleAlign('center');
+      populateFontSelect(document.getElementById('subtitleFontSel'), '');
+      setSubtitleFont('');
+      const tdEl = document.getElementById('workTitleDivider'); if (tdEl) tdEl.checked = false;
+
+      document.getElementById('workTitle').innerHTML = '';
+      const tagsEl = document.getElementById('workTags');
+      if (tagsEl) tagsEl.value = '';
+      const subtitleEl = document.getElementById('workSubtitle');
+      if (subtitleEl) subtitleEl.value = '';
+      const featuredEl = document.getElementById('workFeatured');
+      if (featuredEl) featuredEl.checked = false;
+      setPageBgColor('#ffffff');
+      
+      document.getElementById('tileInput').value = '';
+      document.getElementById('tilePreview').style.display = 'none';
+      document.getElementById('removeTileBtn').style.display = 'none';
+      document.getElementById('tileUploadText').textContent = 'Upload cover image';
+      document.getElementById('editorTitle').textContent = 'New Work';
+      
+      document.querySelectorAll('.aspect-btn').forEach(b => b.classList.toggle('active', b.id === 'aspect-16-10'));
+      
+      updateEditorStatusBadge();
+      renderBlocks();
+      updateStats();
+      showEditorView();
+    }
+
+    async function editWork(id) {
+      const res = await fetch(`/api/works/${encodeURIComponent(id)}`);
+      if (!res.ok) { toast('Failed to load work', true); return; }
+      const work = await res.json();
+      editingId = id;
+      editingStatus = work.status || 'published';
+      blocks = [];
+      blockCounter = 0;
+      tileFile = null;
+      tileRemoved = false;
+      currentTileAspect = work.tileAspect || '16/10';
+      currentTags = (work.tags || []).join(', ');
+      currentBgColor = work.bgColor || '#ffffff';
+      currentTextColor = work.textColor || '';
+      currentTagsAlign = ['left','center','right'].includes(work.tagsAlign) ? work.tagsAlign : 'center';
+      currentSubtitleAlign = ['left','center','right'].includes(work.subtitleAlign) ? work.subtitleAlign : 'center';
+      currentSubtitleSize = ['s','m','l'].includes(work.subtitleSize) ? work.subtitleSize : 'm';
+      currentTitleDivider = !!work.titleDivider;
+      currentTitleAlign = ['left','center','right'].includes(work.titleAlign) ? work.titleAlign : 'center';
+      currentSubtitleFont = work.subtitleFont || '';
+      currentTitleFont = work.titleFont || '';
+      setPageTextColor(currentTextColor);
+      setTagsAlign(currentTagsAlign);
+      setSubtitleAlign(currentSubtitleAlign);
+      setSubtitleSize(currentSubtitleSize);
+      setTitleAlign(currentTitleAlign);
+      populateFontSelect(document.getElementById('subtitleFontSel'), currentSubtitleFont);
+      setSubtitleFont(currentSubtitleFont);
+      const tdEl2 = document.getElementById('workTitleDivider'); if (tdEl2) tdEl2.checked = currentTitleDivider;
+
+      deserializeContent(document.getElementById('workTitle'), work.title || '');
+      const tagsEl = document.getElementById('workTags');
+      if (tagsEl) tagsEl.value = currentTags;
+      const subtitleEl = document.getElementById('workSubtitle');
+      if (subtitleEl) subtitleEl.value = work.subtitle || '';
+      const featuredEl = document.getElementById('workFeatured');
+      if (featuredEl) featuredEl.checked = !!work.featured;
+      setPageBgColor(currentBgColor);
+      
+      document.getElementById('editorTitle').textContent = 'Edit Work';
+      updateEditorStatusBadge();
+
+      document.querySelectorAll('.aspect-btn').forEach(b => {
+        const aspect = b.id.replace('aspect-', '').replace('-', '/');
+        b.classList.toggle('active', aspect === currentTileAspect);
+      });
+
+      const preview = document.getElementById('tilePreview');
+      const removeBtn = document.getElementById('removeTileBtn');
+      const uploadText = document.getElementById('tileUploadText');
+      document.getElementById('tileInput').value = '';
+
+      if (work.tileImage) {
+        preview.src = work.tileImage;
+        preview.style.display = 'block';
+        removeBtn.style.display = 'flex';
+        uploadText.textContent = 'Change tile image';
+      } else {
+        preview.style.display = 'none';
+        removeBtn.style.display = 'none';
+        uploadText.textContent = 'Upload tile image';
+      }
+
+      (work.content || []).forEach((block, i) => {
+        const tempId = blockCounter++;
+        const inRow = i > 0 && !!block.inRow;
+        if (block.type === 'text') {
+          blocks.push({ type: 'text', value: block.value || '', tempId, inRow, width: block.width || 'narrow', align: block.align || 'center' });
+        } else if (block.type === 'image') {
+          blocks.push({
+            type: 'image',
+            src: block.src || '',
+            file: null,
+            tempId,
+            caption: block.caption || '',
+            width: block.width || 'wide',
+            align: block.align || 'center',
+            inRow
+          });
+        } else if (block.type === 'gallery') {
+          blocks.push({
+            type: 'gallery',
+            tempId,
+            columns: block.columns || (block.layout === 'grid' ? 3 : 3),
+            width: block.width || 'wide',
+            align: block.align || 'center',
+            fit: block.fit === 'natural' ? 'natural' : 'fit',
+            inRow,
+            images: (block.images || []).map(img => ({
+              src: img.src || '',
+              file: null,
+              caption: img.caption || '',
+              tempId: blockCounter++
+            }))
+          });
+        } else if (block.type === 'video') {
+          blocks.push({ type: 'video', url: block.url || '', tempId, inRow, width: block.width || 'wide', align: block.align || 'center' });
+        } else if (block.type === 'quote') {
+          blocks.push({ type: 'quote', text: block.text || '', attr: block.attr || '', tempId, inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' });
+        } else if (block.type === 'divider') {
+          blocks.push({ type: 'divider', style: block.style || 'solid', tempId, inRow, width: block.width || 'wide', align: block.align || 'center' });
+        } else if (block.type === 'label') {
+          blocks.push({ type: 'label', text: block.text || '', tempId, inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' });
+        }
+      });
+
+      // Defensive: clean any inRow rows already over the cap or starting with first block.
+      normalizeInRowFlags();
+      renderBlocks();
+
+      // Deserialize content into visual formatting
+      setTimeout(() => {
+        blocks.forEach((block, i) => {
+          if (block.type === 'text') {
+            const el = document.getElementById(`text-${i}`);
+            if (el) {
+              deserializeContent(el, block.value);
+              updateWordCount(i);
+              syncBlockFontDropdown(i);   // show current font in toolbar dropdown
+            }
+          } else if (block.type === 'video') {
+            updateVideoUrl(i, block.url);
+          }
+        });
+        // Title font: detect from rendered title content and set the title dropdown.
+        // Run after fonts have a chance to load via bootLocalFonts so the dropdown's
+        // option list contains the matching family.
+        syncTitleFontDropdown();
+        // Sync again after the dynamic font list arrives (FONT_CHOICES grows post-load)
+        setTimeout(() => { syncTitleFontDropdown(); blocks.forEach((b, i) => b.type === 'text' && syncBlockFontDropdown(i)); }, 600);
+        updateStats();
+      }, 10);
+
+      showEditorView();
+    }
+
+    function showEditorView() {
+      document.getElementById('worksList').style.display = 'none';
+      document.getElementById('editorView').style.display = 'block';
+      // Hide the global admin-header so the editor's sticky toolbar can claim top:0 cleanly.
+      // (Two stacked sticky bars at top:0 overlap and the upper one hides the Preview button.)
+      document.body.classList.add('is-editor-open');
+      window.scrollTo(0, 0);
+
+      // Push state so back button works
+      if (!window.history.state || window.history.state.view !== 'editor') {
+        window.history.pushState({ view: 'editor' }, '');
+      }
+    }
+
+    function cancelEditor() {
+      // Force-close the editor view first — never depend on history.back() succeeding,
+      // because if the history state is missing or out of sync (e.g. after preview-modal
+      // pushes), back() does nothing and the user gets stuck on the editor.
+      const editorEl = document.getElementById('editorView');
+      const listEl   = document.getElementById('worksList');
+      if (editorEl) editorEl.style.display = 'none';
+      if (listEl)   listEl.style.display = 'block';
+      document.body.classList.remove('is-editor-open');
+      // Sync history: if we're still on an 'editor' state, pop it so a real browser back
+      // doesn't re-open the editor. Wrap in try because some embedded contexts forbid it.
+      try {
+        if (window.history.state && window.history.state.view === 'editor') {
+          window.history.back();
+        }
+      } catch (_) { /* no-op */ }
+      // Also clear any in-progress drafts/state that could confuse the next open
+      blocks = [];
+      tileFile = null;
+      tileRemoved = false;
+      editingId = null;
+      window.scrollTo(0, 0);
+    }
+
+    function addTextBlock() {
+      blocks.push({ type: 'text', value: '', tempId: blockCounter++, width: 'narrow', align: 'center' });
+      renderBlocks();
+    }
+
+    function addImageBlock() {
+      blocks.push({ type: 'image', src: '', file: null, tempId: blockCounter++, caption: '', width: 'wide', align: 'center' });
+      renderBlocks();
+    }
+
+    function addGalleryBlock() {
+      blocks.push({
+        type: 'gallery',
+        tempId: blockCounter++,
+        images: [],   // each item: { src, file, caption, tempId }
+        columns: 3,
+        width: 'wide',
+        align: 'center',
+        fit: 'fit'
+      });
+      renderBlocks();
+      updateStats();
+    }
+
+    function addVideoBlock() {
+      blocks.push({ type: 'video', url: '', tempId: blockCounter++, width: 'wide', align: 'center' });
+      renderBlocks();
+      updateStats();
+    }
+
+    function addQuoteBlock() {
+      blocks.push({ type: 'quote', text: '', attr: '', tempId: blockCounter++, width: 'narrow', align: 'center' });
+      renderBlocks();
+      updateStats();
+    }
+
+    function addDividerBlock() {
+      blocks.push({ type: 'divider', style: 'solid', tempId: blockCounter++, width: 'wide', align: 'center' });
+      renderBlocks();
+      updateStats();
+    }
+
+    function addLabelBlock() {
+      blocks.push({ type: 'label', text: '', tempId: blockCounter++ });
+      renderBlocks();
+      updateStats();
+    }
+
+    // Maximum blocks allowed side-by-side in a single row. Behance allows 2 — keeps each
+    // column at a readable width and avoids the cramped layout we hit at 3.
+    const MAX_ROW_BLOCKS = 2;
+
+    // Walk through blocks and clean up impossible inRow states:
+    //  - The first block can never have inRow:true (no prior block to merge with).
+    //  - No row can exceed MAX_ROW_BLOCKS — extras get demoted to their own row.
+    // Run this after any structural mutation (move/remove/duplicate/dragDrop).
+    function normalizeInRowFlags() {
+      let runLen = 0;
+      blocks.forEach((b, i) => {
+        if (i === 0) {
+          b.inRow = false;
+          runLen = 1;
+          return;
+        }
+        if (b.inRow && runLen < MAX_ROW_BLOCKS) {
+          runLen++;
+        } else {
+          b.inRow = false;
+          runLen = 1;
+        }
+      });
+    }
+
+    function moveBlock(index, dir) {
+      const newIndex = index + dir;
+      if (newIndex < 0 || newIndex >= blocks.length) return;
+      [blocks[index], blocks[newIndex]] = [blocks[newIndex], blocks[index]];
+      normalizeInRowFlags();
+      renderBlocks();
+    }
+
+    function duplicateBlock(index) {
+      const b = blocks[index];
+      const copy = JSON.parse(JSON.stringify(b));
+      copy.tempId = blockCounter++;
+      if (copy.file) copy.file = b.file; // Keep file reference if it's unsaved
+      if (copy.images) {
+        copy.images.forEach((img, i) => {
+          img.tempId = blockCounter++;
+          img.file = b.images[i].file;
+        });
+      }
+      // The duplicate starts on a new row by default — easier to reason about than inheriting
+      // the source's inRow flag (which could push the row over the cap).
+      copy.inRow = false;
+      blocks.splice(index + 1, 0, copy);
+      normalizeInRowFlags();
+      renderBlocks();
+      updateStats();
+    }
+
+    function removeBlock(index) {
+      blocks.splice(index, 1);
+      normalizeInRowFlags();
+      renderBlocks();
+      updateStats();
+    }
+
+    // Pop-up menu so user picks WHICH neighbouring block to pair with — instead of the old
+    // behaviour that silently merged with the block above.
+    function openRowMergeMenu(evt, index) {
+      evt.stopPropagation();
+      // Remove any existing menu first
+      document.querySelectorAll('.row-merge-menu').forEach(el => el.remove());
+
+      const canPairPrev = index > 0 && !(blocks[index - 1] && blocks[index - 1].inRow);
+      const canPairNext = index < blocks.length - 1 && !(blocks[index + 1] && blocks[index + 1].inRow);
+
+      const labelOf = b => {
+        if (!b) return '(none)';
+        const map = { text: '✏ Text', image: '🖼 Image', gallery: '🖼 Gallery', video: '▶ Video', quote: '❝ Quote', divider: '— Divider', label: '⊟ Section' };
+        return map[b.type] || b.type;
+      };
+
+      const menu = document.createElement('div');
+      menu.className = 'row-merge-menu';
+      menu.style.cssText = 'position:absolute; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:6px; z-index:200; min-width:200px;';
+      menu.innerHTML = `
+        <div style="font-size:.7rem; color:#9ca3af; padding:6px 10px; text-transform:uppercase; letter-spacing:.05em;">Pair side-by-side with…</div>
+        ${canPairPrev ? `<button type="button" class="row-merge-opt" onclick="mergeWithPrev(${index})" style="display:block; width:100%; text-align:left; padding:8px 10px; border:0; background:transparent; cursor:pointer; border-radius:6px; font-size:.85rem;">↑ Block above (${labelOf(blocks[index - 1])})</button>` : ''}
+        ${canPairNext ? `<button type="button" class="row-merge-opt" onclick="mergeWithNext(${index})" style="display:block; width:100%; text-align:left; padding:8px 10px; border:0; background:transparent; cursor:pointer; border-radius:6px; font-size:.85rem;">↓ Block below (${labelOf(blocks[index + 1])})</button>` : ''}
+      `;
+      menu.querySelectorAll('button').forEach(b => {
+        b.addEventListener('mouseenter', () => b.style.background = '#f3f4f6');
+        b.addEventListener('mouseleave', () => b.style.background = 'transparent');
+      });
+      // Position next to the trigger button
+      const rect = evt.currentTarget.getBoundingClientRect();
+      menu.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+      menu.style.left = (window.scrollX + rect.left) + 'px';
+      document.body.appendChild(menu);
+      // Close on outside click
+      const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close); } };
+      setTimeout(() => document.addEventListener('click', close), 0);
+    }
+
+    // Merge this block with the one above it (the existing simple toggle).
+    function mergeWithPrev(index) {
+      if (index <= 0) return;
+      blocks[index].inRow = true;
+      normalizeInRowFlags();
+      renderBlocks();
+      document.querySelectorAll('.row-merge-menu').forEach(el => el.remove());
+    }
+
+    // Merge this block with the one below it: physically move the next block UP next to this
+    // one so they're adjacent (because our model requires consecutive blocks for a row), then
+    // mark the (now-adjacent) one as inRow.
+    function mergeWithNext(index) {
+      if (index < 0 || index >= blocks.length - 1) return;
+      const next = blocks.splice(index + 1, 1)[0];
+      // Insert it right after current block (same position) and mark as in-row
+      next.inRow = true;
+      blocks.splice(index + 1, 0, next);
+      normalizeInRowFlags();
+      renderBlocks();
+      document.querySelectorAll('.row-merge-menu').forEach(el => el.remove());
+    }
+
+    function toggleInRow(index) {
+      if (index <= 0) return; // first block can't merge with anything
+      const b = blocks[index];
+
+      if (!b.inRow) {
+        // About to merge: count blocks that would end up in the same row.
+        // Walk back to find the row's anchor (block with inRow=false, or index 0).
+        let anchor = index - 1;
+        while (anchor > 0 && blocks[anchor].inRow) anchor--;
+        // Count current row size: anchor + every consecutive inRow block after it.
+        let count = 1; // the anchor itself
+        for (let k = anchor + 1; k < blocks.length && blocks[k].inRow; k++) count++;
+        // Plus this block we're about to merge in.
+        count++;
+        // Plus any blocks AFTER `index` that are already inRow (they'd inherit the same row).
+        for (let k = index + 1; k < blocks.length && blocks[k].inRow; k++) count++;
+
+        if (count > MAX_ROW_BLOCKS) {
+          toast(`Side-by-side rows are limited to ${MAX_ROW_BLOCKS} blocks. Break an existing row first.`, true);
+          return;
+        }
+      }
+      b.inRow = !b.inRow;
+      normalizeInRowFlags();
+      renderBlocks();
+    }
+
+    function serializeContent(el) {
+      let html = el.innerHTML;
+
+      // Strip browser-injected noise spans (font-family:inherit, default font-size, empty styles).
+      // execCommand('removeFormat') often leaves these behind and they display as raw text on tiles.
+      html = html.replace(/<span\s+style="font-family:\s*inherit;?\s*font-size:\s*[^"]*"[^>]*>([\s\S]*?)<\/span>/gi, '$1');
+      html = html.replace(/<span\s+style="font-family:\s*inherit;?"[^>]*>([\s\S]*?)<\/span>/gi, '$1');
+      // Only strip font-size:inherit (browser noise) — preserve user-chosen sizes like 24px.
+      html = html.replace(/<span\s+style="font-size:\s*inherit;?"[^>]*>([\s\S]*?)<\/span>/gi, '$1');
+      // Empty <span> with no style at all
+      html = html.replace(/<span\s*>([\s\S]*?)<\/span>/gi, '$1');
+
+      // Normalize execCommand output — it likes <b>/<i>; convert to semantic tags
+      html = html.replace(/<b>([\s\S]*?)<\/b>/g, '<strong>$1</strong>');
+      html = html.replace(/<i>([\s\S]*?)<\/i>/g, '<em>$1</em>');
+      html = html.replace(/<strike>([\s\S]*?)<\/strike>/g, '<s>$1</s>');
+
+      // Collapse trivial nested duplicates
+      let prev = '';
+      while (prev !== html) {
+        prev = html;
+        html = html.replace(/<strong>([\s\S]*?)<strong>([\s\S]*?)<\/strong>([\s\S]*?)<\/strong>/g, '<strong>$1$2$3</strong>');
+        html = html.replace(/<em>([\s\S]*?)<em>([\s\S]*?)<\/em>([\s\S]*?)<\/em>/g, '<em>$1$2$3</em>');
+        html = html.replace(/<u>([\s\S]*?)<u>([\s\S]*?)<\/u>([\s\S]*?)<\/u>/g, '<u>$1$2$3</u>');
+      }
+
+      let result = html;
+
+      // Color spans -> bracket codes (handles rgb() and #hex)
+      result = result.replace(/<span[^>]*style="[^"]*color:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)[^"]*"[^>]*>([\s\S]*?)<\/span>/g, (m, r, g, b, content) => {
+        const hex = '#' + [r, g, b].map(x => parseInt(x).toString(16).padStart(2, '0')).join('').toUpperCase();
+        return `[C:${hex}]${content}[/C]`;
+      });
+      result = result.replace(/<span[^>]*style="[^"]*color:\s*(#[0-9a-fA-F]{6})[^"]*"[^>]*>([\s\S]*?)<\/span>/g, (m, color, content) => {
+        return `[C:${color}]${content}[/C]`;
+      });
+
+      // Stash styled div/p (text-align) — convert to [ALIGN:x]...[/ALIGN] bracket codes
+      result = result.replace(/<(div|p)[^>]*style="[^"]*text-align:\s*(left|center|right|justify)[^"]*"[^>]*>([\s\S]*?)<\/\1>/g, (m, tag, align, content) => {
+        return `[ALIGN:${align}]${content}[/ALIGN]`;
+      });
+      // Also handle align attribute form
+      result = result.replace(/<(div|p)[^>]*align="(left|center|right|justify)"[^>]*>([\s\S]*?)<\/\1>/g, (m, tag, align, content) => {
+        return `[ALIGN:${align}]${content}[/ALIGN]`;
+      });
+
+      // Headings -> bracket codes
+      result = result.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/g, '[H1]$1[/H1]');
+      result = result.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/g, '[H2]$1[/H2]');
+      result = result.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/g, '[H3]$1[/H3]');
+
+      // Inline formatting -> bracket codes
+      result = result.replace(/<strong>([\s\S]*?)<\/strong>/g, '[B]$1[/B]');
+      result = result.replace(/<em>([\s\S]*?)<\/em>/g, '[I]$1[/I]');
+      result = result.replace(/<u>([\s\S]*?)<\/u>/g, '[U]$1[/U]');
+
+      // Legacy data-text-size spans (kept for backward compat)
+      result = result.replace(/<span data-text-size="small">([\s\S]*?)<\/span>/g, '[S]$1[/S]');
+      result = result.replace(/<span data-text-size="large">([\s\S]*?)<\/span>/g, '[L]$1[/L]');
+      result = result.replace(/<span data-text-size="xl">([\s\S]*?)<\/span>/g, '[XL]$1[/XL]');
+
+      // Lists & links: keep on a single line so the public renderer's per-line wrapping doesn't split them
+      result = result.replace(/<(ul|ol|li|a)([^>]*)>/gi, (m, t, attrs) => {
+        // Strip event-handler attributes for safety
+        const safeAttrs = attrs.replace(/\son\w+="[^"]*"/gi, '');
+        return `<${t}${safeAttrs}>`;
+      });
+      result = result.replace(/(<\/(?:ul|ol|li|a)>)\s*\n+\s*/gi, '$1');
+      result = result.replace(/\n+(\s*<(?:ul|ol|li|a)\b)/gi, '$1');
+      result = result.replace(/<\/li>\s+/gi, '</li>');
+
+      // <br> -> newline
+      result = result.replace(/<br\s*\/?>/g, '\n');
+      // Plain (unstyled) <div>/<p> -> content + newline (preserves paragraph breaks)
+      result = result.replace(/<\/?(div|p)>/g, m => /\//.test(m) ? '\n' : '');
+
+
+
+      // Decode HTML entities, but ONLY the ones that should always be text characters.
+       // Critically: do NOT decode &quot; or &#39; — they're valid escapes inside attribute
+       // values like  style="font-family: &quot;Gotham Black&quot;, sans-serif;"  and decoding
+       // them to literal " would collide with the surrounding " delimiters and silently break
+       // the entire style attribute (eating the font on the saved HTML).
+       result = result
+         .replace(/&amp;/g, '&')
+         .replace(/&nbsp;/g, ' ')
+         .replace(/&lt;/g, '<')
+         .replace(/&gt;/g, '>');
+
+      return result.replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function deserializeContent(el, text) {
+      // Decode any escaped HTML entities so stored raw formatting can render in the editor
+      const entityDecoder = document.createElement('div');
+      entityDecoder.innerHTML = escHtml(text || '');
+      let html = entityDecoder.textContent || entityDecoder.innerText || '';
+
+      // Allow safe HTML tags from backend content
+      html = html.replace(/&lt;(\/)?(strong|em|u|s|strike|h2|h3|h4|span|div|br|p|ul|ol|li|a)([^&]*)&gt;/gi, '<$1$2$3>');
+
+      // Convert [B][/B] to <strong>
+      html = html.replace(/\[B\]([\s\S]*?)\[\/B\]/g, '<strong>$1</strong>');
+      // Convert [I][/I] to <em>
+      html = html.replace(/\[I\]([\s\S]*?)\[\/I\]/g, '<em>$1</em>');
+      // Convert [U][/U] to <u>
+      html = html.replace(/\[U\]([\s\S]*?)\[\/U\]/g, '<u>$1</u>');
+      // Convert [H1][/H1] to <h2>
+      html = html.replace(/\[H1\]([\s\S]*?)\[\/H1\]/g, '<h2>$1</h2>');
+      // Convert [H2][/H2] to <h3>
+      html = html.replace(/\[H2\]([\s\S]*?)\[\/H2\]/g, '<h3>$1</h3>');
+      // Convert [H3][/H3] to <h4>
+      html = html.replace(/\[H3\]([\s\S]*?)\[\/H3\]/g, '<h4>$1</h4>');
+      // Convert size tags
+      html = html.replace(/\[S\]([\s\S]*?)\[\/S\]/g, '<span data-text-size="small">$1</span>');
+      html = html.replace(/\[L\]([\s\S]*?)\[\/L\]/g, '<span data-text-size="large">$1</span>');
+      html = html.replace(/\[XL\]([\s\S]*?)\[\/XL\]/g, '<span data-text-size="xl">$1</span>');
+      // Convert color tags
+      html = html.replace(/\[C:(#[0-9A-Fa-f]{6})\]([\s\S]*?)\[\/C\]/g, '<span style="color: $1;">$2</span>');
+      // Convert alignment tags
+      html = html.replace(/\[ALIGN:(left|center|right|justify)\]([\s\S]*?)\[\/ALIGN\]/g, '<div style="text-align:$1;">$2</div>');
+
+      // Convert newlines to <br>
+      html = html.replace(/\n/g, '<br>');
+
+      el.innerHTML = html;
+    }
+
+    function updateBlockText(index, value) {
+      blocks[index].value = value;
+    }
+
+    function handleBlockImage(index, input) {
+      const file = input.files[0];
+      if (!file) return;
+      blocks[index].file = file;
+      blocks[index].src = '';
+      // Store the data URL on the block (not just the live <img>) so re-rendering — which
+      // happens whenever you change width/align/row settings or add another block — preserves
+      // the preview thumbnail. Without this, every re-render rebuilds the DOM with an empty
+      // src and the image looks like it vanished.
+      blocks[index].previewSrc = '';
+      const reader = new FileReader();
+      reader.onload = e => {
+        blocks[index].previewSrc = e.target.result;
+        const img = document.querySelector(`#block-${index} img`);
+        if (img) { img.src = e.target.result; img.style.display = 'block'; }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function previewTileImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+      tileFile = file;
+      tileRemoved = false;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('tilePreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('removeTileBtn').style.display = 'flex';
+        document.getElementById('tileUploadText').textContent = 'Change tile image';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearTileImage(e) {
+      if (e) e.stopPropagation();
+      tileFile = null;
+      tileRemoved = true;
+      document.getElementById('tileInput').value = '';
+      document.getElementById('tilePreview').style.display = 'none';
+      document.getElementById('removeTileBtn').style.display = 'none';
+      document.getElementById('tileUploadText').textContent = 'Upload cover image';
+    }
+
+    function setTileAspect(ratio, btn) {
+      currentTileAspect = ratio;
+      document.querySelectorAll('.aspect-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function duplicateWork(id, title) {
+      if (!confirm(`Duplicate "${title}"?`)) return;
+      fetch(`/api/works/${encodeURIComponent(id)}/duplicate`, { method: 'POST' })
+        .then(res => res.json())
+        .then(work => {
+          if (work.id) {
+            toast('Work duplicated as draft');
+            loadWorks();
+          } else {
+            toast('Failed to duplicate work', true);
+          }
+        })
+        .catch(err => toast('Error duplicating work', true));
+    }
+
+    function renderBlocks() {
+      const container = document.getElementById('contentBlocks');
+      container.innerHTML = blocks.map((block, i) => {
+        const dragHandle = `<span class="block-drag-handle" title="Drag to reorder"
+            onmousedown="enableBlockDrag(${i})">≡</span>`;
+        // Row toggle. If the block is already in a row → show "Break". Otherwise show a Side-by-side
+        // dropdown letting user pick which adjacent block to pair with (previous or next), instead
+        // of always merging with the block above.
+        let rowToggle = '';
+        if (block.inRow) {
+          rowToggle = `<button class="btn-row" onclick="toggleInRow(${i})" title="Break out into its own row" style="background:#dcfce7; color:#166534;">↵ Break row</button>`;
+        } else {
+          // Can pair with previous block if there is one and it isn't already in a 2-block row.
+          const canPairPrev = i > 0 && !(blocks[i - 1] && blocks[i - 1].inRow);
+          // Can pair with next block by moving it next to me, then merging.
+          const canPairNext = i < blocks.length - 1 && !(blocks[i + 1] && blocks[i + 1].inRow);
+          if (canPairPrev || canPairNext) {
+            rowToggle = `<button class="btn-row" onclick="openRowMergeMenu(event, ${i})" title="Place this block side-by-side with another">⇆ Side-by-side ▾</button>`;
+          }
+        }
+        const controls = `
+          <div class="block-controls">
+            ${rowToggle}
+            <button class="btn-duplicate" onclick="duplicateBlock(${i})" title="Duplicate block">⧉</button>
+            <button onclick="moveBlock(${i},-1)" title="Move up">↑</button>
+            <button onclick="moveBlock(${i},1)" title="Move down">↓</button>
+            <button onclick="removeBlock(${i})" title="Remove">×</button>
+          </div>`;
+
+        if (block.type === 'text') {
+          const yt = (block.value || '').match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+          const vm = (block.value || '').match(/(?:vimeo\.com)\/(\d+)/);
+          const img = (block.value || '').trim().match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg|avif)(?:\?.*)?$/i);
+          let mediaPreview = '';
+          if (yt) mediaPreview = `<div style="margin-top:10px; color:#2563eb; font-size:0.75rem;">▶ YouTube link will embed on the public page</div>`;
+          else if (vm) mediaPreview = `<div style="margin-top:10px; color:#2563eb; font-size:0.75rem;">▶ Vimeo link will embed on the public page</div>`;
+          else if (img) mediaPreview = `<div style="margin-top:10px; color:#16a34a; font-size:0.75rem;">🖼 Image URL will render on the public page</div>`;
+
+          const swatches = RECENT_COLORS.map(c =>
+            `<button type="button" class="color-swatch" style="background:${c};" title="${c}" onclick="applyColor(${i}, '${c}')"></button>`
+          ).join('');
+
+          const tw = block.width || 'narrow';
+          const ta = block.align || 'center';
+          return `<div class="block" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}
+            ${controls}
+            <div class="block-type-label">Text Block</div>
+            <div class="gallery-controls" style="margin-bottom:8px;">
+              <span class="toolbar-label">Block width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${tw === 'narrow' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'narrow')">Narrow</button>
+                <button type="button" class="size-btn ${tw === 'wide' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'wide')">Wide</button>
+                <button type="button" class="size-btn ${tw === 'full' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'full')">Full</button>
+              </div>
+              <span class="toolbar-label">Block align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${ta === 'left' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'left')" title="Place block on the left">⬅</button>
+                <button type="button" class="size-btn ${ta === 'center' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'center')" title="Center the block">⬌</button>
+                <button type="button" class="size-btn ${ta === 'right' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'right')" title="Place block on the right">➡</button>
+              </div>
+            </div>
+            <div class="text-editor">
+              <div class="editor-toolbar">
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'bold')" title="Bold (Ctrl+B)"><strong>B</strong></button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'italic')" title="Italic (Ctrl+I)"><em>I</em></button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'underline')" title="Underline (Ctrl+U)"><u>U</u></button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'strikeThrough')" title="Strikethrough"><s>S</s></button>
+                <div class="editor-divider"></div>
+                <select class="editor-size-select" onmousedown="event.stopPropagation()" onchange="setHeading(${i}, this.value); this.value='';" title="Heading">
+                  <option value="">Style</option>
+                  <option value="p">Paragraph</option>
+                  <option value="h2">Heading 1</option>
+                  <option value="h3">Heading 2</option>
+                  <option value="h4">Heading 3</option>
+                </select>
+                <select class="editor-size-select editor-font-select" data-font-picker="block" onmousedown="event.stopPropagation()" onchange="setFontFamily(${i}, this.value)" title="Font family"><option value="">Font</option></select>
+                <select class="editor-size-select" onmousedown="event.stopPropagation()" onchange="setFontSize(${i}, this.value); this.value='';" title="Font size">
+                  <option value="">Size</option>
+                  <option value="">Default</option>
+                  <option value="12">12px</option>
+                  <option value="14">14px</option>
+                  <option value="16">16px</option>
+                  <option value="18">18px</option>
+                  <option value="20">20px</option>
+                  <option value="24">24px</option>
+                  <option value="28">28px</option>
+                  <option value="32">32px</option>
+                  <option value="40">40px</option>
+                  <option value="48">48px</option>
+                </select>
+                <div class="editor-divider"></div>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'insertUnorderedList')" title="Bullet list">• List</button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'insertOrderedList')" title="Numbered list">1. List</button>
+                <div class="editor-divider"></div>
+                <!-- ALIGNMENT BUTTONS -->
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'justifyLeft')" title="Align left">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="2"/><rect x="3" y="11" width="12" height="2"/><rect x="3" y="17" width="15" height="2"/></svg>
+                </button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'justifyCenter')" title="Align center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="2"/><rect x="6" y="11" width="12" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>
+                </button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'justifyRight')" title="Align right">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="2"/><rect x="9" y="11" width="12" height="2"/><rect x="6" y="17" width="15" height="2"/></svg>
+                </button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'justifyFull')" title="Justify">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="2"/><rect x="3" y="11" width="18" height="2"/><rect x="3" y="17" width="18" height="2"/></svg>
+                </button>
+                <div class="editor-divider"></div>
+                <input type="color" id="color-${i}" class="editor-color-picker" value="#111111" title="Text color" oninput="applyColor(${i}, this.value)" onmousedown="event.stopPropagation()">
+                <div class="color-swatches">${swatches}</div>
+                <div class="editor-divider"></div>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="insertLink(${i})" title="Insert link">🔗 Link</button>
+                <button type="button" class="editor-tool" onmousedown="event.preventDefault()" onclick="exec(${i}, 'removeFormat')" title="Clear formatting">⌫ Clear</button>
+                <span class="word-count" id="wc-${i}">0 words</span>
+              </div>
+              <div class="editor-content" id="text-${i}" contenteditable="true"
+                   oninput="onTextInput(${i})"
+                   onblur="updateBlockText(${i}, serializeContent(this))"
+                   onpaste="onEditorPaste(event, ${i})"
+                   data-placeholder="Write something… paste a YouTube, Vimeo or image URL on its own line to embed it."></div>
+            </div>
+            ${mediaPreview}
+          </div>`;
+        } else if (block.type === 'gallery') {
+          const cols = block.columns || 3;
+          const w = block.width || 'wide';
+          const a = block.align || 'center';
+          const items = (block.images || []).map((img, j) => {
+            const src = img.previewSrc || img.src || '';
+            return `<div class="gallery-item">
+              <button type="button" class="gallery-item-remove" onclick="removeGalleryImage(${i}, ${j})" title="Remove">×</button>
+              ${src ? `<img src="${src}" alt="Gallery image ${j + 1}">` : ''}
+            </div>`;
+          }).join('');
+
+          return `<div class="block block--gallery" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}
+            ${controls}
+            <div class="block-type-label">🖼 Image Collage · ${(block.images || []).length} image${(block.images || []).length === 1 ? '' : 's'}</div>
+            <div class="gallery-controls">
+              <span class="toolbar-label">Columns</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${cols === 2 ? 'active' : ''}" onclick="setGalleryColumns(${i}, 2)">2</button>
+                <button type="button" class="size-btn ${cols === 3 ? 'active' : ''}" onclick="setGalleryColumns(${i}, 3)">3</button>
+                <button type="button" class="size-btn ${cols === 4 ? 'active' : ''}" onclick="setGalleryColumns(${i}, 4)">4</button>
+              </div>
+              <span class="toolbar-label">Width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${w === 'narrow' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'narrow')" title="Narrow column">Narrow</button>
+                <button type="button" class="size-btn ${w === 'wide' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'wide')" title="Standard width">Wide</button>
+                <button type="button" class="size-btn ${w === 'full' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'full')" title="Full-bleed edge to edge">Full</button>
+              </div>
+              <span class="toolbar-label">Align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${a === 'left' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'left')" title="Align left">⬅</button>
+                <button type="button" class="size-btn ${a === 'center' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'center')" title="Center">⬌</button>
+                <button type="button" class="size-btn ${a === 'right' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'right')" title="Align right">➡</button>
+              </div>
+              <span class="toolbar-label">Image fit</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.fit||'fit')==='fit' ? 'active' : ''}" onclick="setGalleryFit(${i}, 'fit')" title="Crop all images to the same shape so the row looks uniform (no empty space below short images)">Auto-fill</button>
+                <button type="button" class="size-btn ${block.fit==='natural' ? 'active' : ''}" onclick="setGalleryFit(${i}, 'natural')" title="Keep each image's original aspect ratio (may leave empty space)">Original</button>
+              </div>
+            </div>
+            <div class="gallery-grid cols-${cols}">
+              ${items}
+              <label class="gallery-add" title="Add image(s)">
+                <span style="font-size:1.4rem; line-height:1;">+</span>
+                <span>Add image</span>
+                <input type="file" accept="image/*" multiple onchange="addGalleryImages(${i}, this)">
+              </label>
+            </div>
+          </div>`;
+        } else if (block.type === 'video') {
+          return `<div class="block block--video" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}${controls}
+            <div class="block-type-label">▶ Video Embed</div>
+            <div class="gallery-controls" style="margin-bottom:8px;">
+              <span class="toolbar-label">Block width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.width||'wide')==='narrow'?'active':''}" onclick="setBlockWidth(${i}, 'narrow')">Narrow</button>
+                <button type="button" class="size-btn ${(block.width||'wide')==='wide'?'active':''}" onclick="setBlockWidth(${i}, 'wide')">Wide</button>
+                <button type="button" class="size-btn ${(block.width||'wide')==='full'?'active':''}" onclick="setBlockWidth(${i}, 'full')">Full</button>
+              </div>
+              <span class="toolbar-label">Block align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.align||'center')==='left'?'active':''}" onclick="setBlockAlign(${i}, 'left')">⬅</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='center'?'active':''}" onclick="setBlockAlign(${i}, 'center')">⬌</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='right'?'active':''}" onclick="setBlockAlign(${i}, 'right')">➡</button>
+              </div>
+            </div>
+            <input type="text" class="video-url-input" placeholder="YouTube or Vimeo URL" value="${escHtml(block.url)}" oninput="updateVideoUrl(${i}, this.value)">
+            <div class="video-preview-thumb" id="video-preview-${i}">Preview will appear here</div>
+          </div>`;
+        } else if (block.type === 'quote') {
+          return `<div class="block block--quote" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}${controls}
+            <div class="block-type-label">❝ Pull Quote</div>
+            <div class="gallery-controls" style="margin-bottom:8px;">
+              <span class="toolbar-label">Block width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.width||'narrow')==='narrow'?'active':''}" onclick="setBlockWidth(${i}, 'narrow')">Narrow</button>
+                <button type="button" class="size-btn ${(block.width||'narrow')==='wide'?'active':''}" onclick="setBlockWidth(${i}, 'wide')">Wide</button>
+                <button type="button" class="size-btn ${(block.width||'narrow')==='full'?'active':''}" onclick="setBlockWidth(${i}, 'full')">Full</button>
+              </div>
+              <span class="toolbar-label">Block align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.align||'center')==='left'?'active':''}" onclick="setBlockAlign(${i}, 'left')">⬅</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='center'?'active':''}" onclick="setBlockAlign(${i}, 'center')">⬌</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='right'?'active':''}" onclick="setBlockAlign(${i}, 'right')">➡</button>
+              </div>
+              <span class="toolbar-label">Font</span>
+              ${fontSelectHTML(block.font || '', `setBlockFont(${i}, this.value)`)}
+            </div>
+            <textarea class="quote-input" placeholder="Enter quote text..." style="font-family:${(block.font||'inherit').replace(/"/g,"'")};" oninput="blocks[${i}].text = this.value; updateStats();">${escHtml(block.text)}</textarea>
+            <input type="text" class="quote-attr-input" placeholder="Attribution (optional)" value="${escHtml(block.attr)}" oninput="blocks[${i}].attr = this.value">
+          </div>`;
+        } else if (block.type === 'divider') {
+          return `<div class="block block--divider" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}${controls}
+            <div class="block-type-label">Divider</div>
+            <div class="gallery-controls" style="margin-bottom:8px;">
+              <span class="toolbar-label">Block width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.width||'wide')==='narrow'?'active':''}" onclick="setBlockWidth(${i}, 'narrow')">Narrow</button>
+                <button type="button" class="size-btn ${(block.width||'wide')==='wide'?'active':''}" onclick="setBlockWidth(${i}, 'wide')">Wide</button>
+                <button type="button" class="size-btn ${(block.width||'wide')==='full'?'active':''}" onclick="setBlockWidth(${i}, 'full')">Full</button>
+              </div>
+              <span class="toolbar-label">Block align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${(block.align||'center')==='left'?'active':''}" onclick="setBlockAlign(${i}, 'left')">⬅</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='center'?'active':''}" onclick="setBlockAlign(${i}, 'center')">⬌</button>
+                <button type="button" class="size-btn ${(block.align||'center')==='right'?'active':''}" onclick="setBlockAlign(${i}, 'right')">➡</button>
+              </div>
+            </div>
+            <div class="divider-style-btns">
+              <button class="divider-style-btn ${block.style==='solid'?'active':''}" onclick="setDividerStyle(${i}, 'solid')">Solid</button>
+              <button class="divider-style-btn ${block.style==='dashed'?'active':''}" onclick="setDividerStyle(${i}, 'dashed')">Dashed</button>
+              <button class="divider-style-btn ${block.style==='spacer'?'active':''}" onclick="setDividerStyle(${i}, 'spacer')">Empty Space</button>
+            </div>
+            ${block.style !== 'spacer' ? `<hr class="divider-preview" style="border-top-style:${block.style};">` : `<div style="height:20px;"></div>`}
+          </div>`;
+        } else if (block.type === 'label') {
+          const lw = block.width || 'narrow';
+          const la = block.align || 'center';
+          return `<div class="block block--label" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}${controls}
+            <div class="block-type-label">Section Label</div>
+            <div class="gallery-controls">
+              <span class="toolbar-label">Width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${lw === 'narrow' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'narrow')">Narrow</button>
+                <button type="button" class="size-btn ${lw === 'wide' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'wide')">Wide</button>
+                <button type="button" class="size-btn ${lw === 'full' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'full')">Full</button>
+              </div>
+              <span class="toolbar-label">Align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${la === 'left' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'left')">⬅</button>
+                <button type="button" class="size-btn ${la === 'center' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'center')">⬌</button>
+                <button type="button" class="size-btn ${la === 'right' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'right')">➡</button>
+              </div>
+              <span class="toolbar-label">Font</span>
+              ${fontSelectHTML(block.font || '', `setBlockFont(${i}, this.value)`)}
+            </div>
+            <input type="text" class="section-label-input" placeholder="e.g. THE RESULTS" style="font-family:${(block.font||'inherit').replace(/"/g,"'")};" value="${escHtml(block.text)}" oninput="blocks[${i}].text = this.value; updateStats();">
+          </div>`;
+        } else {
+          // Image block. previewSrc (from a freshly-uploaded file's FileReader) takes priority
+          // so re-renders keep showing the thumbnail; otherwise fall back to block.src (the
+          // server-saved URL after a save).
+          const hasImage = !!(block.previewSrc || block.src);
+          const imgSrc = block.previewSrc || block.src || '';
+          const w = block.width || 'wide';
+          const a = block.align || 'center';
+          return `<div class="block" id="block-${i}"
+              ondragstart="dragStart(event, ${i})"
+              ondragend="endBlockDrag(${i})"
+              ondragover="dragOver(event)"
+              ondrop="dragDrop(event, ${i})">
+            ${dragHandle}
+            ${controls}
+            <div class="block-type-label">Image Block</div>
+            <div class="gallery-controls">
+              <span class="toolbar-label">Width</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${w === 'narrow' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'narrow')" title="Narrow column">Narrow</button>
+                <button type="button" class="size-btn ${w === 'wide' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'wide')" title="Standard width">Wide</button>
+                <button type="button" class="size-btn ${w === 'full' ? 'active' : ''}" onclick="setBlockWidth(${i}, 'full')" title="Full-bleed edge to edge">Full</button>
+              </div>
+              <span class="toolbar-label">Align</span>
+              <div class="size-buttons">
+                <button type="button" class="size-btn ${a === 'left' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'left')" title="Align left">⬅</button>
+                <button type="button" class="size-btn ${a === 'center' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'center')" title="Center">⬌</button>
+                <button type="button" class="size-btn ${a === 'right' ? 'active' : ''}" onclick="setBlockAlign(${i}, 'right')" title="Align right">➡</button>
+              </div>
+            </div>
+            <div class="block-img-upload">
+              <span>${hasImage ? 'Click to change image' : '📷 Upload image'}</span>
+              <input type="file" accept="image/*" onchange="handleBlockImage(${i}, this)">
+              <img src="${imgSrc}" style="display:${imgSrc ? 'block' : 'none'};" alt="Block image">
+            </div>
+            <input type="text" class="block-caption-input" placeholder="Optional caption…"
+                   value="${escHtml(block.caption || '')}"
+                   oninput="updateBlockCaption(${i}, this.value)">
+          </div>`;
+        }
+      }).join('');
+
+      // CRITICAL: rendering the innerHTML above recreates each contenteditable text editor
+      // as an empty <div>. block.value is the source of truth (kept up to date by onTextInput),
+      // so we must repopulate the freshly rendered editors. Without this, the next saveWork
+      // will read empty editors and overwrite block.value with "" → data loss.
+      blocks.forEach((b, i) => {
+        if (b.type === 'text') {
+          const el = document.getElementById(`text-${i}`);
+          if (el && b.value) {
+            deserializeContent(el, b.value);
+            updateWordCount(i);
+          }
+        } else if (b.type === 'video') {
+          updateVideoUrl(i, b.url || '');
+        }
+      });
+
+      // Re-populate every font picker that was just rendered (the toolbar font dropdowns are
+      // emitted as empty <select>s and need their options filled from FONT_CHOICES).
+      try { populateAllFontPickers(); } catch (_) {}
+
+      // Post-process: wrap consecutive in-row blocks into a single .editor-row flex container,
+      // so the editor visually mirrors the frontend side-by-side layout instead of stacking.
+      const all = Array.from(container.children).filter(c => c.id && c.id.startsWith('block-'));
+      let i2 = 0;
+      while (i2 < all.length) {
+        // Determine how many adjacent blocks (starting at i2) form a row.
+        let runEnd = i2 + 1;
+        while (runEnd < all.length && blocks[runEnd] && blocks[runEnd].inRow) runEnd++;
+        if (runEnd - i2 > 1) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'editor-row';
+          wrapper.dataset.cols = String(runEnd - i2);
+          all[i2].parentNode.insertBefore(wrapper, all[i2]);
+          for (let k = i2; k < runEnd; k++) {
+            wrapper.appendChild(all[k]);
+            all[k].classList.add('in-editor-row');
+          }
+        } else {
+          all[i2].classList.remove('in-editor-row');
+        }
+        i2 = runEnd;
+      }
+    }
+
+    function updateBlockCaption(index, value) {
+      blocks[index].caption = value;
+      updateStats();
+    }
+
+    function updateVideoUrl(index, url) {
+      blocks[index].url = url;
+      const thumb = document.getElementById(`video-preview-${index}`);
+      if (thumb) {
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        const vmMatch = url.match(/(?:vimeo\.com)\/(\d+)/);
+        if (ytMatch) thumb.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
+        else if (vmMatch) thumb.innerHTML = `<iframe src="https://player.vimeo.com/video/${vmMatch[1]}" allowfullscreen></iframe>`;
+        else thumb.innerHTML = 'Preview will appear here';
+      }
+    }
+
+    function setDividerStyle(index, style) {
+      blocks[index].style = style;
+      renderBlocks();
+    }
+
+    // ---------- Gallery / Collage ----------
+    function setGalleryColumns(index, cols) {
+      blocks[index].columns = cols;
+      renderBlocks();
+    }
+
+    function setGalleryFit(index, fit) {
+      blocks[index].fit = ['fit','natural'].includes(fit) ? fit : 'fit';
+      renderBlocks();
+    }
+
+    // ---------- Block width + alignment (Behance-style) ----------
+    function setBlockWidth(index, width) {
+      blocks[index].width = width;
+      renderBlocks();
+    }
+
+    function setBlockAlign(index, align) {
+      blocks[index].align = align;
+      renderBlocks();
+    }
+
+    function setBlockFont(index, font) {
+      blocks[index].font = font || '';
+      renderBlocks();
+    }
+
+    function addGalleryImages(index, input) {
+      const files = Array.from(input.files || []);
+      if (!files.length) return;
+      const block = blocks[index];
+      block.images = block.images || [];
+
+      let pending = files.length;
+      files.forEach(file => {
+        const item = { file, src: '', previewSrc: '', tempId: blockCounter++ };
+        block.images.push(item);
+        const reader = new FileReader();
+        reader.onload = e => {
+          item.previewSrc = e.target.result;
+          if (--pending === 0) renderBlocks();
+        };
+        reader.readAsDataURL(file);
+      });
+      input.value = '';
+    }
+
+    function removeGalleryImage(blockIdx, imgIdx) {
+      blocks[blockIdx].images.splice(imgIdx, 1);
+      renderBlocks();
+    }
+
+    function onTextInput(index) {
+      const el = document.getElementById(`text-${index}`);
+      if (!el) return;
+      // User is actively typing — always trust what's currently in the editor (even if empty,
+      // because they may have deliberately cleared it).
+      blocks[index].value = serializeContent(el);
+      updateWordCount(index);
+    }
+
+    function updateWordCount(index) {
+      const el = document.getElementById(`text-${index}`);
+      const wc = document.getElementById(`wc-${index}`);
+      if (!el || !wc) return;
+      const text = (el.innerText || '').trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      wc.textContent = `${words} word${words === 1 ? '' : 's'}`;
+    }
+
+    function onEditorPaste(e, index) {
+      // Strip rich formatting from pasted text to avoid weird styles
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
+    }
+
+    // ---------- Block drag/drop (handle-only) ----------
+    let draggedBlockIndex = null;
+
+    function enableBlockDrag(index) {
+      const block = document.getElementById(`block-${index}`);
+      if (block) block.setAttribute('draggable', 'true');
+    }
+    function endBlockDrag(index) {
+      const block = document.getElementById(`block-${index}`);
+      if (block) {
+        block.removeAttribute('draggable');
+        block.classList.remove('__dragging');
+      }
+      draggedBlockIndex = null;
+    }
+    function dragStart(e, index) {
+      draggedBlockIndex = index;
+      e.dataTransfer.effectAllowed = 'move';
+      const block = document.getElementById(`block-${index}`);
+      if (block) block.classList.add('__dragging');
+    }
+    function dragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+    function dragDrop(e, targetIndex) {
+      e.preventDefault();
+      if (draggedBlockIndex === null || draggedBlockIndex === targetIndex) return;
+      const draggedBlock = blocks[draggedBlockIndex];
+      blocks.splice(draggedBlockIndex, 1);
+      blocks.splice(targetIndex, 0, draggedBlock);
+      normalizeInRowFlags();
+      renderBlocks();
+      draggedBlockIndex = null;
+    }
+
+    // ---------- Rich-text formatting via execCommand ----------
+    function exec(blockIndex, cmd, value) {
+      const editor = document.getElementById(`text-${blockIndex}`);
+      editor.focus();
+      try { document.execCommand('styleWithCSS', false, true); } catch (_) { }
+      document.execCommand(cmd, false, value);
+      blocks[blockIndex].value = serializeContent(editor);
+      updateWordCount(blockIndex);
+    }
+
+    function setHeading(blockIndex, tag) {
+      if (!tag) return;
+      const editor = document.getElementById(`text-${blockIndex}`);
+      editor.focus();
+      document.execCommand('formatBlock', false, tag);
+      blocks[blockIndex].value = serializeContent(editor);
+      updateWordCount(blockIndex);
+    }
+
+    function setFontSize(blockIndex, px) {
+      const editor = document.getElementById(`text-${blockIndex}`);
+      editor.focus();
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) { toast('Select text first', true); return; }
+      const range = sel.getRangeAt(0);
+      const content = range.extractContents();
+      if (!px) {
+        // Reset: insert plain content (strip outer font-size spans is best-effort)
+        range.insertNode(content);
+      } else {
+        const wrap = document.createElement('span');
+        wrap.style.fontSize = px + 'px';
+        wrap.appendChild(content);
+        range.insertNode(wrap);
+      }
+      sel.removeAllRanges();
+      blocks[blockIndex].value = serializeContent(editor);
+    }
+
+    // Shared list of fonts used across both the toolbar dropdowns and per-block selectors.
+    // Starts with web-safe + Google fonts; the local Gotham family files in /public/fonts get
+    // appended by bootLocalFonts() once /api/fonts responds.
+    const FONT_CHOICES = [
+      { label: 'Default', value: '' },
+      { label: 'Inter', value: "Inter, sans-serif" },
+      { label: 'Roboto', value: "Roboto, sans-serif" },
+      { label: 'Montserrat', value: "Montserrat, sans-serif" },
+      { label: 'Poppins', value: "Poppins, sans-serif" },
+      { label: 'Playfair Display', value: "'Playfair Display', serif" },
+      { label: 'Lora', value: "Lora, serif" },
+      { label: 'Times New Roman', value: "'Times New Roman', Times, serif" },
+      { label: 'Georgia', value: "Georgia, serif" },
+      { label: 'Arial', value: "Arial, sans-serif" },
+      { label: 'Helvetica', value: "Helvetica, Arial, sans-serif" },
+      { label: 'Verdana', value: "Verdana, sans-serif" },
+      { label: 'Courier New', value: "'Courier New', Courier, monospace" }
+    ];
+
+    // Re-fill EVERY font picker on the page from the current FONT_CHOICES list. Called after
+    // renderBlocks (toolbar dropdowns get rebuilt) and after bootLocalFonts (new fonts arrive).
+    function populateAllFontPickers() {
+      document.querySelectorAll('select[data-font-picker]').forEach(sel => {
+        const current = sel.value;
+        // Toolbar pickers (data-font-picker="block" / "title") use a "Font" placeholder; they
+        // reset their selection after each use, so don't pre-select.
+        if (sel.dataset.fontPicker === 'block' || sel.dataset.fontPicker === 'title') {
+          sel.innerHTML = `<option value="">Font</option>` + FONT_CHOICES.map(f => {
+            const styleAttr = f.value ? ` style="font-family:${f.value};"` : '';
+            return `<option value="${f.value.replace(/"/g, '&quot;')}"${styleAttr}>${f.label}</option>`;
+          }).join('');
+        } else {
+          // Per-field pickers (subtitle/quote/label) — show currently-selected value.
+          populateFontSelect(sel, current);
+        }
+      });
+    }
+
+    // Auto-discover every font file in /public/fonts and add it to FONT_CHOICES, plus inject
+    // the matching @font-face rules so previews actually render. Drop a new .otf into that
+    // folder and it just shows up in every dropdown.
+    async function bootLocalFonts() {
+      try {
+        const res = await fetch('/api/fonts');
+        if (!res.ok) return;
+        const fonts = await res.json();
+        if (!Array.isArray(fonts) || fonts.length === 0) return;
+        let css = '';
+        const families = new Map(); // family-name → seen
+        fonts.forEach(f => {
+          css += `@font-face { font-family: '${f.family}'; src: url('${f.file}') format('${f.format}'); ${f.italic ? "font-style: italic;" : "font-style: normal;"} font-display: swap; }\n`;
+          families.set(f.family, true);
+        });
+        const styleEl = document.createElement('style');
+        styleEl.id = 'local-fonts';
+        styleEl.textContent = css;
+        document.head.appendChild(styleEl);
+        // Insert each discovered family near the top of FONT_CHOICES (right after "Default"),
+        // only if not already present.
+        const existing = new Set(FONT_CHOICES.map(f => f.label));
+        let insertAt = 1;
+        for (const family of families.keys()) {
+          if (existing.has(family)) continue;
+          FONT_CHOICES.splice(insertAt, 0, { label: family, value: `'${family}', sans-serif` });
+          insertAt++;
+        }
+        populateAllFontPickers();
+      } catch (e) {
+        console.warn('[fonts] bootstrap failed:', e);
+      }
+    }
+    bootLocalFonts();
+
+    // Build a <select> markup that calls `onChangeFn(this.value, ...args)` and shows the current
+    // value as selected. Used for per-block font choosers next to plain inputs/textareas.
+    function fontSelectHTML(currentValue, onChangeJs, extraStyle = '') {
+      const opts = FONT_CHOICES.map(f => {
+        const sel = (currentValue || '') === f.value ? ' selected' : '';
+        const styleAttr = f.value ? ` style="font-family:${f.value};"` : '';
+        return `<option value="${escHtml(f.value)}"${sel}${styleAttr}>${escHtml(f.label)}</option>`;
+      }).join('');
+      return `<select class="editor-size-select" style="${extraStyle}" onchange="${onChangeJs}">${opts}</select>`;
+    }
+
+    // Apply a font-family by manually wrapping the selection (or the whole editor if no
+    // selection) in a <span style="font-family:...">. We deliberately do NOT use
+    // execCommand('fontName') because in some browsers it rewrites/strips OTHER inline
+    // styles (bold, color, italic) when re-applied — which was wiping the user's formatting.
+    //
+    // Manual wrap:
+    //  • Strips any inner font-family spans in the operating range so we don't nest fonts.
+    //  • Preserves every other inline style + tag (<strong>, <em>, <u>, color spans).
+    //  • Whitespace inside the extracted fragment is preserved (we never serialize
+    //    intermediate HTML to a string, so the browser can't collapse spaces).
+    function applyFontToEditor(editor, font) {
+      if (!editor) return;
+      const sel = window.getSelection();
+      const inside = sel && sel.anchorNode && editor.contains(sel.anchorNode);
+
+      // Helper: walk a DOM tree and strip font-family from any inline spans, unwrapping
+      // spans whose entire style becomes empty so we don't leave hollow wrappers.
+      function stripInnerFonts(root) {
+        const spans = root.querySelectorAll
+          ? root.querySelectorAll('span[style*="font-family"]')
+          : [];
+        spans.forEach(s => {
+          s.style.removeProperty('font-family');
+          if (!s.getAttribute('style') || !s.getAttribute('style').trim()) {
+            while (s.firstChild) s.parentNode.insertBefore(s.firstChild, s);
+            s.parentNode.removeChild(s);
+          }
+        });
+      }
+
+      if (inside && !sel.isCollapsed) {
+        // We have a selection inside this editor — operate on it.
+        editor.focus();
+        const range = sel.getRangeAt(0);
+        const frag = range.extractContents();
+        stripInnerFonts(frag);
+        if (font) {
+          const wrap = document.createElement('span');
+          wrap.style.fontFamily = font;
+          wrap.appendChild(frag);
+          range.insertNode(wrap);
+        } else {
+          range.insertNode(frag);
+        }
+        sel.removeAllRanges();
+        return;
+      }
+
+      // No selection — wrap the entire editor content in a font span without touching
+      // any inner structure. This is the path "user picked font without selecting".
+      // We do this in-place using DOM operations (not innerHTML string mangling) so the
+      // browser can't collapse whitespace or normalize anything.
+      stripInnerFonts(editor);
+      if (!font) return; // "Default" = inner spans already stripped above, done.
+      const wrap = document.createElement('span');
+      wrap.style.fontFamily = font;
+      while (editor.firstChild) wrap.appendChild(editor.firstChild);
+      editor.appendChild(wrap);
+    }
+
+    function setFontFamily(blockIndex, font) {
+      const editor = document.getElementById(`text-${blockIndex}`);
+      applyFontToEditor(editor, font);
+      // Re-serialize so block.value reflects the change immediately (saveWork would
+      // otherwise miss it until the user blurs the editor).
+      blocks[blockIndex].value = serializeContent(editor);
+      // Keep the dropdown showing the picked font so the user gets visual feedback.
+      const blockEl = document.getElementById(`block-${blockIndex}`);
+      const sel = blockEl && blockEl.querySelector('select[data-font-picker="block"]');
+      if (sel) sel.value = font || '';
+    }
+
+    function setTitleFontFamily(font) {
+      const editor = document.getElementById('workTitle');
+      applyFontToEditor(editor, font);
+      const sel = document.querySelector('select[data-font-picker="title"]');
+      if (sel) sel.value = font || '';
+    }
+
+    // Title font size — wraps selected text (or all content if no selection) in a
+    // <span style="font-size:Npx"> so the saved title HTML carries the chosen size.
+    function setTitleFontSize(px) {
+      const editor = document.getElementById('workTitle');
+      if (!editor) return;
+      editor.focus();
+      const sel = window.getSelection();
+      const inside = sel && sel.anchorNode && editor.contains(sel.anchorNode);
+      if (!sel || sel.isCollapsed || !inside) {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+      }
+      const sel2 = window.getSelection();
+      const range = sel2.getRangeAt(0);
+      const content = range.extractContents();
+      if (!px) {
+        range.insertNode(content);
+      } else {
+        const wrap = document.createElement('span');
+        wrap.style.fontSize = px + 'px';
+        wrap.appendChild(content);
+        range.insertNode(wrap);
+      }
+      sel2.removeAllRanges();
+    }
+
+    // Pull the dominant font-family out of an editor's content so we can show it in the
+    // toolbar dropdown when an existing work is opened. We look at the first <span> with a
+    // font-family style; if none, return ''.
+    function detectEditorFont(editor) {
+      if (!editor) return '';
+      const span = editor.querySelector('span[style*="font-family"]');
+      if (!span) return '';
+      const ff = span.style.fontFamily || '';
+      // Match against FONT_CHOICES so the dropdown actually has this option to select.
+      // Compare normalised (no quotes, lowercased) so 'Gotham Black' === "'Gotham Black'".
+      const norm = s => (s || '').replace(/['"]/g, '').toLowerCase().trim();
+      const target = norm(ff);
+      const match = FONT_CHOICES.find(c => norm(c.value).startsWith(target.split(',')[0]) || norm(c.label) === target.split(',')[0]);
+      return match ? match.value : '';
+    }
+
+    // Sync a block's font dropdown to whatever font is currently inside its editor.
+    function syncBlockFontDropdown(blockIndex) {
+      const blockEl = document.getElementById(`block-${blockIndex}`);
+      const editor  = document.getElementById(`text-${blockIndex}`);
+      const sel     = blockEl && blockEl.querySelector('select[data-font-picker="block"]');
+      if (!editor || !sel) return;
+      const font = detectEditorFont(editor);
+      sel.value = font;
+    }
+
+    function syncTitleFontDropdown() {
+      const editor = document.getElementById('workTitle');
+      const sel    = document.querySelector('select[data-font-picker="title"]');
+      if (!editor || !sel) return;
+      sel.value = detectEditorFont(editor);
+    }
+
+    function applyColor(blockIndex, color) {
+      const editor = document.getElementById(`text-${blockIndex}`);
+      editor.focus();
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) {
+        // No selection: just remember the picker color (also update the input swatch)
+        const picker = document.getElementById(`color-${blockIndex}`);
+        if (picker) picker.value = color;
+        return;
+      }
+      try { document.execCommand('styleWithCSS', false, true); } catch (_) { }
+      document.execCommand('foreColor', false, color);
+      blocks[blockIndex].value = serializeContent(editor);
+    }
+
+    function insertLink(blockIndex) {
+      const editor = document.getElementById(`text-${blockIndex}`);
+      editor.focus();
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) { toast('Select text first to link it', true); return; }
+      const url = prompt('Enter URL (https://…):', 'https://');
+      if (!url) return;
+      document.execCommand('createLink', false, url);
+      // Make new links open in a new tab
+      editor.querySelectorAll('a[href]').forEach(a => a.setAttribute('target', '_blank'));
+      blocks[blockIndex].value = serializeContent(editor);
+    }
+
+    async function saveWork(status) {
+      const titleEl = document.getElementById('workTitle');
+      const title = serializeContent(titleEl).trim();
+      if (!title) { toast('Please enter a title', true); return; }
+
+      // Sync any focused contenteditable to its block before saving.
+      // SAFETY: never overwrite a non-empty block.value with an empty editor — the editor
+      // may have been recreated empty by a recent renderBlocks() and not yet repopulated.
+      blocks.forEach((b, i) => {
+        if (b.type === 'text') {
+          const el = document.getElementById(`text-${i}`);
+          if (!el) return;
+          const fresh = serializeContent(el);
+          if (fresh && fresh.trim()) b.value = fresh;
+          // else keep the previously stored b.value — data must not be lost.
+        }
+      });
+
+      const finalStatus = status || editingStatus || 'published';
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('status', finalStatus);
+      formData.append('subtitle', (document.getElementById('workSubtitle') || {}).value || '');
+      formData.append('featured', (document.getElementById('workFeatured') || {}).checked ? 'true' : 'false');
+
+      if (tileFile) formData.append('tileImage', tileFile);
+      if (tileRemoved) formData.append('removeTileImage', 'true');
+
+      formData.append('tileAspect', currentTileAspect);
+      const tagsStr = document.getElementById('workTags') ? document.getElementById('workTags').value : currentTags;
+      const tagsArray = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+      formData.append('tags', JSON.stringify(tagsArray));
+      formData.append('bgColor', currentBgColor);
+      formData.append('textColor', currentTextColor || '');
+      formData.append('tagsAlign', currentTagsAlign);
+      formData.append('subtitleAlign', currentSubtitleAlign);
+      formData.append('subtitleSize', currentSubtitleSize);
+      formData.append('titleDivider', (document.getElementById('workTitleDivider') || {}).checked ? 'true' : 'false');
+      formData.append('titleAlign', currentTitleAlign);
+      formData.append('subtitleFont', currentSubtitleFont || '');
+      // NOTE: subtitle + featured were already appended at the top of saveWork; do not append a
+      // second time — multipart FormData will send both values and the server joins them with ',',
+      // which makes the stored subtitle look like "text,text,text,text" after each save.
+
+      const contentJson = blocks.map((block, i) => {
+        const inRow = i > 0 && !!block.inRow;
+        if (block.type === 'text') {
+          return { type: 'text', value: block.value, inRow, width: block.width || 'narrow', align: block.align || 'center' };
+        }
+        if (block.type === 'video') return { type: 'video', url: block.url || '', inRow, width: block.width || 'wide', align: block.align || 'center' };
+        if (block.type === 'quote') return { type: 'quote', text: block.text || '', attr: block.attr || '', inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' };
+        if (block.type === 'divider') return { type: 'divider', style: block.style || 'solid', inRow, width: block.width || 'wide', align: block.align || 'center' };
+        if (block.type === 'label') return { type: 'label', text: block.text || '', inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' };
+        if (block.type === 'gallery') {
+          const images = (block.images || []).map(img => {
+            if (img.file) {
+              const fieldName = `galleryImage_${img.tempId}`;
+              formData.append(fieldName, img.file);
+              return { fieldName, caption: img.caption || '' };
+            }
+            return { src: img.src || '', caption: img.caption || '' };
+          });
+          return {
+            type: 'gallery',
+            images,
+            columns: block.columns || 3,
+            layout: 'grid',
+            width: block.width || 'wide',
+            align: block.align || 'center',
+            fit: block.fit === 'natural' ? 'natural' : 'fit',
+            inRow
+          };
+        }
+        // single image
+        const fieldName = `contentImage_${block.tempId}`;
+        const imgMeta = {
+          caption: block.caption || '',
+          width: block.width || 'wide',
+          align: block.align || 'center',
+          inRow
+        };
+        if (block.file) {
+          formData.append(fieldName, block.file);
+          return { type: 'image', fieldName, ...imgMeta };
+        }
+        return { type: 'image', src: block.src || '', ...imgMeta };
+      });
+
+      formData.append('content', JSON.stringify(contentJson));
+
+      // Debug log — tells us exactly what's being sent
+      const formEntries = Array.from(formData.entries()).map(([k, v]) =>
+        v instanceof File ? `${k}=File(${v.name}, ${(v.size / 1024).toFixed(1)}KB)` : `${k}=${typeof v === 'string' && v.length > 80 ? v.slice(0, 80) + '…' : v}`
+      );
+      console.log('[saveWork] sending:', { status: finalStatus, blocks: blocks.length, contentJson });
+      console.log('[saveWork] FormData:', formEntries);
+
+      const url = editingId ? `/api/works/${editingId}` : '/api/works';
+      const method = editingId ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, { method, body: formData });
+        if (res.ok) {
+          const verb = finalStatus === 'draft' ? 'saved as draft' : finalStatus === 'unpublished' ? 'unpublished' : (editingId ? 'updated' : 'published');
+          toast(`Work ${verb}!`);
+          cancelEditor();
+          loadWorks();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          toast(err.error || 'Save failed', true);
+        }
+      } catch (e) {
+        toast('Network error', true);
+      }
+    }
+
+    // ============ UTILS ============
+    function formatText(text) {
+      if (!text) return '';
+      let html = escHtml(text);
+      // Re-allow the same safe inline tags the public renderer allows, so titles that
+      // were stored with raw <span style="..."> from execCommand don't display as text.
+      // Match anything (including escaped &quot; inside attributes) lazily until the closing &gt;.
+      // The previous [^&]* pattern broke on attribute strings containing &quot;, leaving the
+      // whole tag rendered as literal text on tile cards.
+      html = html.replace(/&lt;(\/)?(strong|em|u|s|strike|h2|h3|h4|span|div|br|p|ul|ol|li|a)([\s\S]*?)&gt;/gi, (m, slash, tag, attrs) => {
+        // Preserve &quot;/&#39; — they're correct inside attribute values like
+        //   style="font-family: &quot;Gotham Black&quot;, …"
+        // Decoding them to literal " would collide with the surrounding " delimiters.
+        const safeAttrs = (attrs || '')
+          .replace(/&amp;/g, '&')
+          .replace(/\son\w+="[^"]*"/gi, '')
+          .replace(/\son\w+='[^']*'/gi, '')
+          .replace(/javascript:/gi, '');
+        return `<${slash || ''}${tag}${safeAttrs}>`;
+      });
+      html = html.replace(/\[C:(#[0-9A-Fa-f]{6})\]([\s\S]*?)\[\/C\]/g, '<span style="color: $1;">$2</span>');
+      html = html.replace(/\[B\]([\s\S]*?)\[\/B\]/g, '<strong>$1</strong>');
+      html = html.replace(/\[I\]([\s\S]*?)\[\/I\]/g, '<em>$1</em>');
+      html = html.replace(/\[U\]([\s\S]*?)\[\/U\]/g, '<u>$1</u>');
+      html = html.replace(/\[H1\]([\s\S]*?)\[\/H1\]/g, '<strong>$1</strong>');
+      html = html.replace(/\[H2\]([\s\S]*?)\[\/H2\]/g, '<strong>$1</strong>');
+      html = html.replace(/\[H3\]([\s\S]*?)\[\/H3\]/g, '<strong>$1</strong>');
+      html = html.replace(/\[ALIGN:(left|center|right|justify)\]([\s\S]*?)\[\/ALIGN\]/g, '<div style="text-align:$1;">$2</div>');
+      return html;
+    }
+
+    function setPageBgColor(color) {
+      currentBgColor = color || '#ffffff';
+      const picker = document.getElementById('pageBgColor');
+      const bar = document.getElementById('bgColorPreviewBar');
+      const text = document.getElementById('bgColorPreviewText');
+      if (picker) picker.value = currentBgColor;
+      if (bar) { bar.style.background = currentBgColor; }
+      if (text) text.textContent = currentBgColor;
+    }
+
+    function setPageTextColor(color) {
+      currentTextColor = color || '';
+      const picker = document.getElementById('pageTextColor');
+      const text = document.getElementById('textColorPreviewText');
+      if (picker && currentTextColor) picker.value = currentTextColor;
+      if (text) text.textContent = currentTextColor || 'auto';
+    }
+
+    function setSubtitleAlign(v) {
+      currentSubtitleAlign = ['left','center','right'].includes(v) ? v : 'center';
+      document.querySelectorAll('#subtitleAlignBtns .size-btn').forEach(b => b.classList.toggle('active', b.dataset.val === currentSubtitleAlign));
+    }
+    function setSubtitleSize(v) {
+      currentSubtitleSize = ['s','m','l'].includes(v) ? v : 'm';
+      document.querySelectorAll('#subtitleSizeBtns .size-btn').forEach(b => b.classList.toggle('active', b.dataset.val === currentSubtitleSize));
+    }
+    function setTagsAlign(v) {
+      currentTagsAlign = ['left','center','right'].includes(v) ? v : 'center';
+      document.querySelectorAll('#tagsAlignBtns .size-btn').forEach(b => b.classList.toggle('active', b.dataset.val === currentTagsAlign));
+    }
+    function setTitleAlign(v) {
+      currentTitleAlign = ['left','center','right'].includes(v) ? v : 'center';
+      document.querySelectorAll('#titleAlignBtns .size-btn').forEach(b => b.classList.toggle('active', b.dataset.val === currentTitleAlign));
+    }
+    function setSubtitleFont(v) {
+      currentSubtitleFont = v || '';
+      const input = document.getElementById('workSubtitle');
+      if (input) input.style.fontFamily = currentSubtitleFont || '';
+      const sel = document.getElementById('subtitleFontSel');
+      if (sel && sel.value !== currentSubtitleFont) sel.value = currentSubtitleFont;
+    }
+
+    // Populate every per-field font selector with the FONT_CHOICES options once they exist.
+    function populateFontSelect(selectEl, currentValue) {
+      if (!selectEl) return;
+      selectEl.innerHTML = FONT_CHOICES.map(f => {
+        const sel = (currentValue || '') === f.value ? ' selected' : '';
+        const styleAttr = f.value ? ` style="font-family:${f.value};"` : '';
+        return `<option value="${f.value.replace(/"/g, '&quot;')}"${sel}${styleAttr}>${f.label}</option>`;
+      }).join('');
+    }
+
+    function stripFormatting(text) {
+      if (!text) return '';
+      // Strip both bracket-tag formatting AND raw HTML tags. Otherwise titles that contain
+      // raw <span style="..."> from execCommand show as literal markup in plain-text places
+      // (preview header, tile card fallback, document title, etc.).
+      return text
+        .replace(/<[^>]*>/g, '')                  // strip HTML tags
+        .replace(/\[[A-Z0-9:#]+\]/gi, '')         // strip [B], [I], [ALIGN:...] etc
+        .replace(/\[\/[A-Z0-9]+\]/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function updateStats() {
+      const statsBar = document.getElementById('editorStatsBar');
+      if (!statsBar) return;
+      document.getElementById('statBlocks').textContent = blocks.length;
+      let imgCount = tileFile || (editingId && !tileRemoved) ? 1 : 0;
+      let words = 0;
+      blocks.forEach(b => {
+        if (b.type === 'image' && (b.src || b.file)) imgCount++;
+        if (b.type === 'gallery') imgCount += (b.images || []).length;
+        if (b.type === 'text' || b.type === 'quote' || b.type === 'label') {
+          const text = b.value || b.text || '';
+          const cleanText = stripFormatting(text);
+          const w = cleanText.trim() ? cleanText.trim().split(/\s+/).length : 0;
+          words += w;
+        }
+      });
+      document.getElementById('statImages').textContent = imgCount;
+      document.getElementById('statWords').textContent = words;
+      document.getElementById('statStatus').textContent = editingStatus;
+    }
+
+    // ============ PREVIEW MODAL & SITE ============
+    function openPreviewSite() {
+      window.open('/', '_blank');
+    }
+
+    async function openLivePreview() {
+      const titleEl = document.getElementById('workTitle');
+      const title = serializeContent(titleEl).trim();
+      if (!title) { toast('Please enter a title before previewing', true); return; }
+      
+      const statusToSave = editingStatus === 'published' ? 'published' : 'draft';
+      blocks.forEach((b, i) => {
+        if (b.type === 'text') {
+          const el = document.getElementById(`text-${i}`);
+          if (el) b.value = serializeContent(el);
+        }
+      });
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('status', statusToSave);
+      formData.append('tileAspect', currentTileAspect);
+      const tagsStr = document.getElementById('workTags') ? document.getElementById('workTags').value : currentTags;
+      const tagsArray = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+      formData.append('tags', JSON.stringify(tagsArray));
+      formData.append('bgColor', currentBgColor);
+      formData.append('textColor', currentTextColor || '');
+      formData.append('tagsAlign', currentTagsAlign);
+      formData.append('subtitleAlign', currentSubtitleAlign);
+      formData.append('subtitleSize', currentSubtitleSize);
+      formData.append('titleDivider', (document.getElementById('workTitleDivider') || {}).checked ? 'true' : 'false');
+      formData.append('titleAlign', currentTitleAlign);
+      formData.append('subtitleFont', currentSubtitleFont || '');
+      const subtitleEl2 = document.getElementById('workSubtitle');
+      const featuredEl2 = document.getElementById('workFeatured');
+      formData.append('subtitle', subtitleEl2 ? subtitleEl2.value : '');
+      formData.append('featured', featuredEl2 && featuredEl2.checked ? 'true' : 'false');
+
+      if (tileFile) formData.append('tileImage', tileFile);
+      if (tileRemoved) formData.append('removeTileImage', 'true');
+
+      const contentJson = blocks.map((block, i) => {
+        const inRow = i > 0 && !!block.inRow;
+        if (block.type === 'text') return { type: 'text', value: block.value, inRow, width: block.width || 'narrow', align: block.align || 'center' };
+        if (block.type === 'video') return { type: 'video', url: block.url || '', inRow, width: block.width || 'wide', align: block.align || 'center' };
+        if (block.type === 'quote') return { type: 'quote', text: block.text || '', attr: block.attr || '', inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' };
+        if (block.type === 'divider') return { type: 'divider', style: block.style || 'solid', inRow, width: block.width || 'wide', align: block.align || 'center' };
+        if (block.type === 'label') return { type: 'label', text: block.text || '', inRow, width: block.width || 'narrow', align: block.align || 'center', font: block.font || '' };
+        if (block.type === 'gallery') {
+          const images = (block.images || []).map(img => {
+            if (img.file) {
+              const fieldName = `galleryImage_${img.tempId}`;
+              formData.append(fieldName, img.file);
+              return { fieldName, caption: img.caption || '' };
+            }
+            return { src: img.src || '', caption: img.caption || '' };
+          });
+          return { type: 'gallery', images, columns: block.columns || 3, layout: 'grid', width: block.width || 'wide', align: block.align || 'center', fit: block.fit === 'natural' ? 'natural' : 'fit', inRow };
+        }
+        const fieldName = `contentImage_${block.tempId}`;
+        if (block.file) {
+          formData.append(fieldName, block.file);
+          return { type: 'image', fieldName, caption: block.caption || '', width: block.width || 'wide', align: block.align || 'center', inRow };
+        }
+        return { type: 'image', src: block.src || '', caption: block.caption || '', width: block.width || 'wide', align: block.align || 'center', inRow };
+      });
+      formData.append('content', JSON.stringify(contentJson));
+
+      const url = editingId ? `/api/works/${editingId}` : '/api/works';
+      const method = editingId ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, { method, body: formData });
+        if (res.ok) {
+          const work = await res.json();
+          editingId = work.id;
+          editingStatus = work.status;
+          
+          document.getElementById('previewTitle').textContent = stripFormatting(work.title);
+          document.getElementById('previewIframe').src = `/work-detail.html?id=${work.id}&preview=true`;
+          document.getElementById('previewModal').classList.add('open');
+          document.body.style.overflow = 'hidden';
+          updateEditorStatusBadge();
+        } else {
+          // Surface the actual server error so we can see what failed (auth lost? validation?
+          // server crashed?) instead of a generic message.
+          let detail = `HTTP ${res.status}`;
+          try {
+            const err = await res.json();
+            if (err && err.error) detail += ` — ${err.error}`;
+          } catch (_) {
+            try { const txt = await res.text(); if (txt) detail += ` — ${txt.slice(0, 120)}`; } catch (_) {}
+          }
+          console.error('[preview] save failed:', detail);
+          toast(`Preview failed: ${detail}`, true);
+        }
+      } catch (e) {
+        toast('Network error during preview save', true);
+      }
+    }
+
+    function setViewport(type) {
+      document.querySelectorAll('.viewport-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('vp-' + type).classList.add('active');
+      const frame = document.getElementById('previewFrame');
+      frame.className = 'preview-modal__frame ' + type;
+    }
+
+    function closePreview() {
+      document.getElementById('previewModal').classList.remove('open');
+      document.getElementById('previewIframe').src = '';
+      document.body.style.overflow = '';
+      loadWorks();
+    }
+
+    function execTitle(cmd, value) {
+      const editor = document.getElementById('workTitle');
+      editor.focus();
+      try { document.execCommand('styleWithCSS', false, true); } catch (_) { }
+      document.execCommand(cmd, false, value);
+    }
+
+    function applyTitleColor(color) {
+      const editor = document.getElementById('workTitle');
+      editor.focus();
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) return;
+      try { document.execCommand('styleWithCSS', false, true); } catch (_) { }
+      document.execCommand('foreColor', false, color);
+    }
+
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    function toast(msg, isError) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { el.className = 'toast'; }, 3000);
+    }
+
+    // Handle Enter key on login
+    document.getElementById('loginPass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // Editor keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      const editorView = document.getElementById('editorView');
+      if (!editorView || editorView.style.display === 'none') return;
+      
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          saveWork('published');
+        } else {
+          saveWork('draft');
+        }
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        openLivePreview();
+      }
+    });
+
+    // Init
+    checkAuth();
+  </script>
+</body>
+
+</html>

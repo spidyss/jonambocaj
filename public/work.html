@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Manoj Jacob — Executive Creative Director. Portfolio showcasing creative work, brand strategy, and design leadership.">
+  <title>The Work — Manoj Jacob</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    @media (max-width: 768px) {
+      .work-grid {
+        grid-template-rows: repeat(5, 1fr) !important;
+      }
+    }
+  </style>
+
+<body>
+  <!-- ========== BACK BUTTON ========== -->
+  <a href="index.html" class="subpage__back subpage__back--standalone" aria-label="Go Back">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+  </a>
+
+  <!-- ========== ABOUT TEXT ========== -->
+  <section class="about-text" id="about-text">
+    <div class="container">
+      <div class="about-text__content fade-in">
+        <p>some of the work here is recent. some of it isn't.<br>but good ideas are good ideas. they don't
+          expire.
+          <!-- <br>they're ageless.</p> -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== WORK SECTION ========== -->
+  <section class="work-section" id="work-section">
+    <div class="container">
+      <div class="work-section__grid-wrapper">
+        <!-- Left Arrow -->
+        <button class="carousel-nav" id="prevWork" aria-label="Previous">←</button>
+
+        <!-- Grid Viewport -->
+        <div class="work-grid-viewport">
+          <div class="work-grid" id="work-grid">
+            <div id="work-loading"
+              style="grid-column: 1 / -1; text-align: center; color: #999; font-family: 'Gotham Book', serif; padding: 40px 0;">
+              Loading works...</div>
+          </div>
+        </div>
+
+        <!-- Right Arrow -->
+        <button class="carousel-nav" id="nextWork" aria-label="Next">→</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== WORK MODAL ========== -->
+  <div class="work-modal" id="workModal">
+    <button class="work-modal__close" onclick="closeWorkModal()" aria-label="Close Project">✕</button>
+    <iframe class="work-modal__iframe" id="workModalIframe" title="Project Details"></iframe>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Intersection Observer for scroll-triggered animations
+      const animatedElements = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .stagger-children');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      animatedElements.forEach(el => observer.observe(el));
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('work-grid');
+      const loading = document.getElementById('work-loading');
+      const prevBtn = document.getElementById('prevWork');
+      const nextBtn = document.getElementById('nextWork');
+      let currentPage = 0;
+      let totalItems = 0;
+
+      function updateCarousel() {
+        const viewport = document.querySelector('.work-grid-viewport');
+        if (!viewport) return;
+
+        const itemsPerPage = window.innerWidth <= 768 ? 10 : 8;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        const style = window.getComputedStyle(grid);
+        const gap = parseInt(style.columnGap) || 24;
+
+
+
+        const offset = currentPage * (viewport.offsetWidth + gap);
+        grid.style.transform = `translateX(-${offset}px)`;
+
+        if (prevBtn) prevBtn.disabled = currentPage === 0;
+        if (nextBtn) nextBtn.disabled = currentPage >= totalPages - 1;
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (currentPage > 0) {
+            currentPage--;
+            updateCarousel();
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          const itemsPerPage = window.innerWidth <= 768 ? 10 : 8;
+          if (currentPage < Math.ceil(totalItems / itemsPerPage) - 1) {
+            currentPage++;
+            updateCarousel();
+          }
+        });
+      }
+
+      window.addEventListener('resize', updateCarousel);
+
+      fetch('/api/works')
+        .then(res => res.json())
+        .then(data => {
+          if (loading) loading.style.display = 'none';
+          if (!data || data.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #666; font-family: \'Gotham Book\', serif; padding: 40px 0;">No projects found yet.</div>';
+            return;
+          }
+
+          totalItems = data.length;
+          grid.innerHTML = data.map(w => {
+            const plainTitle = stripFormatting(w.title || '');
+            const titleHtml = formatText(w.title || '');
+            const subtitle = (w.subtitle || '').trim();
+            // Single-line ellipsis subtitle — no wrapping, no growing the overlay.
+            const subtitleHtml = subtitle ? `<div style="color:rgba(255,255,255,0.78); font-size:0.72rem; margin-top:4px; font-family:'Gotham Book',serif; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${escHtml(subtitle)}</div>` : '';
+            const aspect = (w.tileAspect || '16/10').replace('-', '/');
+            const featuredBadge = w.featured ? `<div style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.7); color:#ffd166; font-size:0.65rem; font-family:'Gotham Book',sans-serif; padding:4px 8px; border-radius:4px; letter-spacing:1px; z-index:2; pointer-events:none;">★ FEATURED</div>` : '';
+            return `
+            <div class="work-grid__item fade-in" onclick="openWorkModal('${w.id}')" style="aspect-ratio: ${aspect}; position:relative;">
+              ${featuredBadge}
+              ${w.tileImage ? `<img src="${w.tileImage}" alt="${plainTitle.replace(/"/g, '&quot;')}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#1a1a1a; color:#9ca3af; padding:18px; text-align:center; overflow:hidden;"><span style="display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:clamp(0.75rem,1.4vw,0.95rem); font-family:'Gotham Book',sans-serif;">${escHtml(plainTitle || 'Untitled')}</span></div>`}
+              <div class="work-grid__overlay" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.7) 100%); display: flex; align-items: flex-end; padding: 15px; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                <div style="color:#fff; font-size:0.95rem; width:100%; line-height:1.25; overflow:hidden;"><span style="display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(plainTitle || 'Untitled')}</span>${subtitleHtml}</div>
+              </div>
+            </div>
+            `;
+          }).join('');
+
+          updateCarousel();
+
+          setTimeout(() => {
+            document.querySelectorAll('.work-grid__item').forEach((el, i) => {
+              setTimeout(() => el.classList.add('visible'), i * 50);
+            });
+          }, 100);
+        })
+        .catch(err => {
+          console.error('Error loading works:', err);
+          if (loading) loading.textContent = 'Unable to load works.';
+        });
+    });
+
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    function formatText(text) {
+      if (!text) return '';
+      let html = escHtml(text);
+      html = html.replace(/\[C:(#[0-9A-Fa-f]{6})\]([\s\S]*?)\[\/C\]/g, '<span style="color: $1;">$2</span>');
+      html = html.replace(/\[B\]([\s\S]*?)\[\/B\]/g, '<strong>$1</strong>');
+      html = html.replace(/\[I\]([\s\S]*?)\[\/I\]/g, '<em>$1</em>');
+      html = html.replace(/\[U\]([\s\S]*?)\[\/U\]/g, '<u>$1</u>');
+      html = html.replace(/\[ALIGN:(left|center|right|justify)\]([\s\S]*?)\[\/ALIGN\]/g, '<div style="text-align:$1;">$2</div>');
+      html = html.replace(/\[H1\]([\s\S]*?)\[\/H1\]/g, '$1');
+      html = html.replace(/\[H2\]([\s\S]*?)\[\/H2\]/g, '$1');
+      html = html.replace(/\[H3\]([\s\S]*?)\[\/H3\]/g, '$1');
+      return html;
+    }
+
+    function stripFormatting(text) {
+      if (!text) return '';
+      // Strip both HTML tags AND bracket-tag formatting so the plain title is safe to drop
+      // into a tile, alt attribute, or document.title — without leaking <span style=...> markup.
+      return text
+        .replace(/<[^>]*>/g, '')
+        .replace(/\[[A-Z0-9:#]+\]/gi, '')
+        .replace(/\[\/[A-Z0-9]+\]/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // ============ MODAL & ROUTING ============
+    // Track open state in JS so popstate can decide what to do without depending on URL alone.
+    let modalOpenId = null;
+
+    // KEY: navigate the iframe with contentWindow.location.replace() instead of setting
+    // iframe.src. Setting .src to a new URL pushes an extra entry onto the browser session
+    // history — that's why a single browser-Back used to land on a "blank" state (popping the
+    // iframe nav) and required a second Back to actually close the modal. .replace() swaps
+    // the iframe content without creating that extra entry.
+    function navigateIframe(iframe, url) {
+      try {
+        if (iframe.contentWindow && iframe.contentWindow.location) {
+          iframe.contentWindow.location.replace(url);
+          return;
+        }
+      } catch (_) { /* cross-origin or not-yet-loaded — fall through */ }
+      iframe.src = url;
+    }
+
+    function openWorkModal(id, pushState = true) {
+      const modal = document.getElementById('workModal');
+      const iframe = document.getElementById('workModalIframe');
+
+      // Add modal=true flag so work-detail.html hides its header
+      navigateIframe(iframe, `work-detail.html?id=${encodeURIComponent(id)}&modal=true`);
+
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      modalOpenId = id;
+
+      if (pushState && window.history.pushState) {
+        window.history.pushState({ modalId: id }, '', `?id=${encodeURIComponent(id)}`);
+      }
+    }
+
+    function closeWorkModal(pushState = true) {
+      const modal = document.getElementById('workModal');
+      const iframe = document.getElementById('workModalIframe');
+
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+      modalOpenId = null;
+
+      // Wait for the slide-down transition to finish, then blank the iframe (also via replace
+      // so it doesn't create a history entry). Skipping this reveals a flash of stale content
+      // if the user re-opens immediately, but a 500ms wait matches the modal's CSS transition.
+      setTimeout(() => navigateIframe(iframe, 'about:blank'), 500);
+
+      if (pushState && window.history.pushState) {
+        // Replace state instead of pushing — pushing creates an extra history entry that the
+        // user has to back through twice to leave the page entirely.
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
+
+    // Single source of truth for popstate: decide based on the new state, not URL parsing.
+    // The lightbox INSIDE the iframe also pushes/pops state — those events bubble up here too,
+    // so we must guard against double-handling: if the iframe state is "lightbox", do nothing.
+    window.addEventListener('popstate', (e) => {
+      const st = e.state;
+      // Lightbox-pushed states are handled inside the iframe; ignore them here.
+      if (st && st.lightbox) return;
+
+      if (st && st.modalId) {
+        // User went forward to a modal state — open it (idempotent).
+        if (modalOpenId !== st.modalId) openWorkModal(st.modalId, false);
+      } else {
+        // Any non-modal state means "list view" — close any open modal.
+        if (modalOpenId) closeWorkModal(false);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+       const params = new URLSearchParams(window.location.search);
+       const id = params.get('id');
+       if (id) {
+         openWorkModal(id, false);
+         // Establish a baseline state so the very first browser Back closes the modal cleanly
+         // (otherwise back goes outside the site entirely).
+         try { window.history.replaceState({ modalId: id }, ''); } catch (_) {}
+       }
+    });
+
+    // The work-detail iframe sends a postMessage when its lightbox opens/closes. While the
+    // lightbox is open we hide the work-modal's own X button — otherwise it sits at top-right
+    // on top of the iframe and users click it expecting to close just the image, which
+    // accidentally closes the whole work modal.
+    window.addEventListener('message', (e) => {
+      if (!e.data || e.data.type !== 'lightbox') return;
+      const closeBtn = document.querySelector('.work-modal__close');
+      if (!closeBtn) return;
+      closeBtn.style.visibility = e.data.open ? 'hidden' : '';
+      closeBtn.style.pointerEvents = e.data.open ? 'none' : '';
+    });
+  </script>
+</body>
+
+</html>

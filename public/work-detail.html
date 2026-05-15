@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Work Detail — Manoj Jacob, Executive Creative Director.">
+  <title>Work — Manoj Jacob</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;700&family=Lora:wght@400;700&family=Poppins:wght@300;400;500;700&display=swap">
+  <script>
+    // Discover every font file in /public/fonts and inject the matching @font-face rules so
+    // any font the admin assigned (subtitle/quote/label/inline span fonts) actually renders.
+    (async function loadLocalFonts() {
+      try {
+        const res = await fetch('/api/fonts');
+        if (!res.ok) return;
+        const fonts = await res.json();
+        if (!Array.isArray(fonts) || fonts.length === 0) return;
+        const css = fonts.map(f =>
+          `@font-face { font-family: '${f.family}'; src: url('${f.file}') format('${f.format}'); ${f.italic ? "font-style: italic;" : "font-style: normal;"} font-display: swap; }`
+        ).join('\n');
+        const styleEl = document.createElement('style');
+        styleEl.id = 'local-fonts';
+        styleEl.textContent = css;
+        document.head.appendChild(styleEl);
+      } catch (_) { /* non-fatal: fall back to system fonts */ }
+    })();
+  </script>
+  <style>
+    /* Stop the page from ever scrolling horizontally on narrow screens */
+    html, body { overflow-x: hidden; max-width: 100vw; }
+    /* Force content blocks to wrap — long unbroken strings like "tag,tag,tag,..." would
+       otherwise push past the viewport because commas aren't word-break opportunities. */
+    .work-detail, .work-detail * { overflow-wrap: anywhere; word-wrap: break-word; }
+    img, iframe, video { max-width: 100%; height: auto; }
+    /* The .subpage__body in style.css uses align-items:center on a flex-column, which makes
+       children shrink to their widest child instead of stretching to viewport width — that
+       causes 1080px-max-width blocks to push the parent out past mobile viewport. Force the
+       work-detail container to span the full available width on every screen size. */
+    .subpage__body { align-items: stretch !important; }
+    /* Behance-style layout: a narrower reading column inside a roomy page */
+    .work-detail { max-width: 1440px; width: 100%; margin: 0 auto; padding: 0 24px 100px; box-sizing: border-box; }
+    .work-detail__title {
+      font-family: 'Gotham', serif;
+      font-weight: 300;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      color: #1a1a1a;
+      text-align: center;
+      margin: 0 auto 50px;
+      letter-spacing: 0.01em;
+      line-height: 1.15;
+      position: relative;
+      max-width: 860px;
+      /* Preserve the line breaks and blank lines the user typed in the title editor —
+         pre-wrap keeps \n as real breaks AND still wraps long lines on narrow screens. */
+      white-space: pre-wrap;
+    }
+    /* Title underline bar — off by default, opt-in via body.has-title-divider.
+       The title h1 becomes inline-block so the border-bottom hugs the title text width. The
+       horizontal position is controlled by a wrapper (.work-detail__title-wrap) whose text-align
+       matches the chosen titleAlign — so 'left' puts the title (and underline) flush left,
+       'right' flush right, 'center' centered. */
+    body.has-title-divider .work-detail__title {
+      display: inline-block;
+      border-bottom: 2px solid currentColor;
+      padding-bottom: 18px;
+    }
+    .work-detail__title-wrap {
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    /* When divider is OFF, the title still uses its own block-level centering via .work-detail__title CSS,
+       but we override that here so titleAlign actually moves it. text-align on the wrapper covers both
+       the inline-block (divider on) and block-level (divider off) cases via display:flex below. */
+    .work-detail__title-wrap[data-align="left"]   { text-align: left; }
+    .work-detail__title-wrap[data-align="center"] { text-align: center; }
+    .work-detail__title-wrap[data-align="right"]  { text-align: right; }
+    /* When divider is OFF, h1 is block-level. text-align on wrapper doesn't move a 100%-wide block,
+       so override the h1's auto margin to honour the wrapper's intent. */
+    .work-detail__title-wrap[data-align="left"] > .work-detail__title:not(.is-inline)  { margin-left: 0; margin-right: auto; }
+    .work-detail__title-wrap[data-align="right"] > .work-detail__title:not(.is-inline) { margin-left: auto; margin-right: 0; }
+    /* Inner text alignment also follows titleAlign so the title text isn't centered inside a
+       left-aligned box (which would visually look misaligned). */
+    .work-detail__title-wrap[data-align="left"]   > .work-detail__title { text-align: left; }
+    .work-detail__title-wrap[data-align="center"] > .work-detail__title { text-align: center; }
+    .work-detail__title-wrap[data-align="right"]  > .work-detail__title { text-align: right; }
+    .work-detail__block {
+      margin: 0 auto 48px;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .work-detail__block.visible { opacity: 1; transform: translateY(0); }
+
+    /* Behance-style width modes */
+    .work-detail__block--w-narrow { max-width: 720px; }
+    .work-detail__block--w-wide   { max-width: 1080px; }
+    .work-detail__block--w-full   { max-width: 1440px; }
+
+    /* When alignment is left/right, the block hugs that side instead of centering */
+    .work-detail__block--a-left   { margin-left: 0; margin-right: auto; }
+    .work-detail__block--a-center { margin-left: auto; margin-right: auto; }
+    .work-detail__block--a-right  { margin-left: auto; margin-right: 0; }
+
+    /* Legacy fallbacks so old blocks still render reasonably */
+    .work-detail__block--text:not([class*="w-"]) { max-width: 720px; }
+    .work-detail__block--media:not([class*="w-"]) { max-width: 1080px; }
+    .work-detail__block--gallery:not([class*="w-"]) { max-width: 1080px; }
+
+    /* Behance-style side-by-side rows */
+    .work-detail__row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .work-detail__row-item {
+      flex: 1 1 0;
+      min-width: 0; /* allow children with images to shrink properly */
+    }
+    /* Children inside a row item: cancel the centering/margins, let the row's flex sizing win */
+    .work-detail__row-item > .work-detail__block {
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
+    }
+    @media (max-width: 700px) {
+      .work-detail__row { flex-direction: column; gap: 32px; }
+    }
+
+    .work-detail__text {
+      font-family: 'Gotham', serif;
+      font-weight: 400;
+      font-size: clamp(1rem, 1.6vw, 1.1rem);
+      line-height: 1.75;
+      color: #2a2a2a;
+      white-space: pre-wrap;
+      letter-spacing: 0.005em;
+    }
+    /* Tighter spacing between adjacent paragraphs in the same block */
+    .work-detail__block--text > .work-detail__text + .work-detail__text { margin-top: 0.6em; }
+    /* Slight breathing room between sibling content blocks (consistent rhythm) */
+    .work-detail__block + .work-detail__block { margin-top: 6px; }
+    .work-detail__image {
+      width: 100%;
+      border-radius: 6px;
+      display: block;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      cursor: zoom-in;
+      transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .work-detail__image:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,0.08); }
+
+    /* Lightbox — image viewer with zoom controls. Close button sits at TOP-LEFT so it can't
+       conflict with the parent work-modal's close button (which sits at top-right). */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(8, 8, 10, 0.94);
+      display: none; align-items: center; justify-content: center;
+      z-index: 999999;                /* must be above the parent work-modal close (z 99999) */
+      padding: 60px 40px 40px;
+      animation: lightboxIn .2s ease;
+      overflow: auto;                  /* allow scrolling when zoomed in */
+    }
+    .lightbox.is-open { display: flex; }
+    .lightbox__viewport {
+      max-width: 100%; max-height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox img {
+      max-width: 100%;
+      max-height: calc(100vh - 100px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5);
+      border-radius: 4px;
+      transform-origin: center center;
+      transition: transform .2s ease;
+      cursor: grab;
+      user-select: none;
+    }
+    .lightbox img.is-zoomed { cursor: grabbing; }
+    .lightbox__close, .lightbox__btn {
+      position: fixed;                  /* fixed so they don't scroll with zoomed image */
+      background: rgba(255,255,255,0.12);
+      color: #fff; border: 0;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      font-size: 1.3rem; line-height: 1;
+      cursor: pointer; display: grid; place-items: center;
+      transition: background .2s ease;
+      z-index: 2;
+    }
+    .lightbox__close:hover, .lightbox__btn:hover { background: rgba(255,255,255,0.22); }
+    /* TOP-LEFT close — clearly separated from the parent modal's top-right close button */
+    .lightbox__close { top: 20px; left: 20px; }
+    /* Zoom controls bottom-center */
+    .lightbox__controls {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; align-items: center;
+      background: rgba(255,255,255,0.08); padding: 6px; border-radius: 30px;
+      z-index: 2;
+    }
+    .lightbox__controls .lightbox__btn { position: static; width: 38px; height: 38px; }
+    .lightbox__zoom-label { color: #fff; font-size: .8rem; min-width: 40px; text-align: center; opacity: .8; }
+    @keyframes lightboxIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (max-width: 600px) {
+      .lightbox { padding: 60px 16px 80px; }
+      .lightbox__close { top: 12px; left: 12px; width: 38px; height: 38px; }
+    }
+    .work-detail__caption {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 10px;
+      text-align: center;
+      font-style: italic;
+    }
+    /* Caption follows the block's alignment so a left-aligned image gets a left-aligned caption */
+    .work-detail__block--a-left  > .work-detail__caption { text-align: left; }
+    .work-detail__block--a-right > .work-detail__caption { text-align: right; }
+
+    /* Gallery / collage — Behance grid style */
+    .work-detail__gallery {
+      display: grid;
+      gap: 14px;
+      width: 100%;
+    }
+    .work-detail__gallery.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .work-detail__gallery.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .work-detail__gallery.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .work-detail__gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 6px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .work-detail__gallery-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+    }
+    .work-detail__gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+      transition: transform .35s ease;
+    }
+    .work-detail__gallery-item:hover img { transform: scale(1.02); }
+
+    /* Auto-fit mode (default): every gallery item shares the same aspect so a row of mixed-ratio
+       images doesn't leave empty space below the shorter ones. The image is cropped via
+       object-fit:cover. */
+    .work-detail__gallery--fit .work-detail__gallery-item { aspect-ratio: 4 / 3; }
+    /* Square-ish for 4-column grids so each tile isn't too narrow to read */
+    .work-detail__gallery--fit.cols-4 .work-detail__gallery-item { aspect-ratio: 1 / 1; }
+    /* Natural mode: preserve each image's own ratio (may leave gaps but shows full content) */
+    .work-detail__gallery--natural .work-detail__gallery-item { aspect-ratio: auto; }
+    .work-detail__gallery--natural .work-detail__gallery-item img { height: auto; }
+    .work-detail__gallery-caption {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 6px;
+      text-align: center;
+      font-style: italic;
+    }
+    @media (max-width: 900px) {
+      .work-detail__gallery.cols-3, .work-detail__gallery.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .work-detail__gallery.cols-2, .work-detail__gallery.cols-3, .work-detail__gallery.cols-4 { grid-template-columns: 1fr; }
+    }
+    .work-detail__loading {
+      text-align: center;
+      padding: 100px 20px;
+      color: #999;
+      font-size: 1rem;
+    }
+    .work-detail__error {
+      text-align: center;
+      padding: 100px 20px;
+    }
+    .work-detail__error h2 {
+      font-family: 'Gotham', serif;
+      font-weight: 400;
+      font-size: 2rem;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+    .work-detail__error p { color: #999; }
+    /* Hide header logo on work detail page */
+    .subpage__logo { display: none; }
+    @media (max-width: 768px) {
+      .work-detail { padding: 0 18px 60px; }
+      .work-detail__block--text { max-width: 100%; }
+      /* Cap every block at the viewport width on phones — wide/full mode would otherwise
+         force horizontal scroll. */
+      .work-detail__block--w-narrow,
+      .work-detail__block--w-wide,
+      .work-detail__block--w-full { max-width: 100%; }
+      /* Inline-block title (when divider is on) must also cap at viewport width or long
+         titles will overflow */
+      .work-detail__title { max-width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .work-detail { padding: 0 14px 50px; }
+      /* Smaller side gap inside rows on tiny screens */
+      .work-detail__row { gap: 14px; }
+    }
+
+    /* Modal mode specific adjustments */
+    /* In modal mode (opened from work.html grid via iframe), hide the inner page header
+       — the parent modal already has its own X close button. The footer (trademark) stays
+       visible at the bottom, just like in the live preview. */
+    body.is-modal .subpage__header { display: none !important; }
+    body.is-modal .subpage__body {
+      padding-top: 60px !important;     /* breathing room above the title */
+    }
+    /* Footer in modal mode: lighter background so it blends with the page background, no
+       hard top border, slightly tighter padding */
+    body.is-modal .footer {
+      background: transparent;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding: 30px 20px;
+      margin-top: 40px;
+    }
+    body.dark-bg.is-modal .footer { border-top-color: rgba(255,255,255,0.08); }
+
+    /* Background color transition */
+    body {
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* Dark background mode */
+    body.dark-bg .work-detail__title,
+    body.dark-bg .work-detail__text,
+    body.dark-bg .work-detail__caption,
+    body.dark-bg h1, body.dark-bg h2, body.dark-bg h3,
+    body.dark-bg h4, body.dark-bg p, body.dark-bg blockquote {
+      color: #f0f0f0 !important;
+    }
+    body.dark-bg .subpage__back {
+      color: #f0f0f0;
+      background: rgba(255,255,255,0.1);
+    }
+    body.dark-bg .footer__text {
+      color: #888;
+    }
+    body.dark-bg .work-detail__tags span {
+      background: rgba(255,255,255,0.1) !important;
+      color: #ccc !important;
+    }
+  </style>
+  <script>
+    if (new URLSearchParams(window.location.search).get('modal') === 'true') {
+      document.documentElement.classList.add('is-modal');
+    }
+  </script>
+</head>
+<body onload="if(new URLSearchParams(window.location.search).get('modal') === 'true') document.body.classList.add('is-modal')">
+
+  <div class="subpage">
+    <header class="subpage__header">
+      <a href="index.html#work-section" class="subpage__back" id="back-works" onclick="if(document.referrer.indexOf(window.location.host)!==-1){event.preventDefault(); history.back();}">
+        <span class="subpage__back-arrow">←</span> back
+      </a>
+      <p class="subpage__logo">manoj jacob</p>
+    </header>
+
+    <main class="subpage__body" style="justify-content:flex-start; padding-top:50px;">
+      <div id="loading" class="work-detail__loading">Loading...</div>
+      <div id="errorView" class="work-detail__error" style="display:none;">
+        <h2>Work not found</h2>
+        <p>This work may have been removed or the link is invalid.</p>
+      </div>
+      <div id="content" class="work-detail" style="display:none;"></div>
+    </main>
+
+    <footer class="footer">
+      <p class="footer__text">&copy; 2026 Manoj Jacob. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button class="lightbox__close" id="lightboxClose" aria-label="Close image">×</button>
+    <div class="lightbox__viewport">
+      <img id="lightboxImg" alt="">
+    </div>
+    <div class="lightbox__controls" role="toolbar" aria-label="Zoom controls">
+      <button class="lightbox__btn" id="lightboxZoomOut" aria-label="Zoom out" title="Zoom out (-)">−</button>
+      <span class="lightbox__zoom-label" id="lightboxZoomLabel">100%</span>
+      <button class="lightbox__btn" id="lightboxZoomIn" aria-label="Zoom in" title="Zoom in (+)">+</button>
+      <button class="lightbox__btn" id="lightboxZoomReset" aria-label="Reset zoom" title="Reset zoom (0)" style="font-size:.95rem;">⟳</button>
+    </div>
+  </div>
+
+  <script>
+    function formatText(text) {
+      if (!text) return '';
+
+      let html = text;
+      // CRITICAL: do NOT decode entities via textarea.innerHTML/value — that helper strips
+      // real HTML tags from the input string in modern browsers, which was eating the
+      // font-family <span>s the admin saves. Use plain string replacement instead so any
+      // raw HTML (font spans, color spans, alignment divs) survives intact.
+      //
+      // Equally important: do NOT decode &quot; or &#39; here. The browser serializes inline
+      // styles like `style.fontFamily = "'Gotham Black', sans-serif"` to
+      //   <span style="font-family: &quot;Gotham Black&quot;, sans-serif;">
+      // — &quot; inside the attribute is correct HTML. Decoding it to a literal " would
+      // collide with the surrounding " delimiters and silently drop the font.
+      html = html
+        .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+      // Safety net for very old data with double-escaped tags: only matches sequences that
+      // start with &lt; (which we just decoded above), so this is effectively a no-op now —
+      // kept defensively in case older drafts ever round-trip through here.
+      html = html.replace(/&lt;(\/)?(strong|em|u|s|strike|h2|h3|h4|span|div|br|p|ul|ol|li|a)([\s\S]*?)&gt;/gi, '<$1$2$3>');
+
+      // Parse color tags (C:#HEXCOLOR)
+      html = html.replace(/\[C:(#[0-9A-Fa-f]{6})\]([\s\S]*?)\[\/C\]/g, (match, color, content) => {
+        return `<span style="color: ${color};">${content}</span>`;
+      });
+      
+      // Parse headings (H1, H2, H3) - use [\s\S] instead of . to match newlines
+      html = html.replace(/\[H1\]([\s\S]*?)\[\/H1\]/g, (match, content) => {
+        return `<h2 style="font-family: 'Gotham', serif; font-weight: 300; font-size: 1.8rem; margin: 20px 0 10px 0; color: #1a1a1a;">${content}</h2>`;
+      });
+      html = html.replace(/\[H2\]([\s\S]*?)\[\/H2\]/g, (match, content) => {
+        return `<h3 style="font-family: 'Gotham', serif; font-weight: 300; font-size: 1.4rem; margin: 15px 0 8px 0; color: #1a1a1a;">${content}</h3>`;
+      });
+      html = html.replace(/\[H3\]([\s\S]*?)\[\/H3\]/g, (match, content) => {
+        return `<h4 style="font-family: 'Gotham', serif; font-weight: 300; font-size: 1.1rem; margin: 12px 0 6px 0; color: #1a1a1a;">${content}</h4>`;
+      });
+      
+      // Parse text formatting (B, I, U)
+      html = html.replace(/\[B\]([\s\S]*?)\[\/B\]/g, '<strong style="font-weight: 600;">$1</strong>');
+      html = html.replace(/\[I\]([\s\S]*?)\[\/I\]/g, '<em style="font-style: italic;">$1</em>');
+      html = html.replace(/\[U\]([\s\S]*?)\[\/U\]/g, '<span style="text-decoration: underline;">$1</span>');
+      
+      // Parse alignment tags (ALIGN:left|center|right|justify)
+      html = html.replace(/\[ALIGN:(left|center|right|justify)\]([\s\S]*?)\[\/ALIGN\]/g, (match, align, content) => {
+        return `<div style="text-align: ${align}; width:100%;">${content}</div>`;
+      });
+      
+      // Parse size tags (S, L, XL)
+      html = html.replace(/\[S\]([\s\S]*?)\[\/S\]/g, '<span style="font-size: 0.85em;">$1</span>');
+      html = html.replace(/\[L\]([\s\S]*?)\[\/L\]/g, '<span style="font-size: 1.25em;">$1</span>');
+      html = html.replace(/\[XL\]([\s\S]*?)\[\/XL\]/g, '<span style="font-size: 1.5em;">$1</span>');
+      
+      return html;
+    }
+
+    function stripFormatting(text) {
+      if (!text) return '';
+      return text.replace(/\[[A-Z0-9:#]+\]/gi, '').replace(/\[\/[A-Z0-9]+\]/gi, '');
+    }
+
+    function isDarkColor(hex) {
+      const h = hex.replace('#', '');
+      const r = parseInt(h.substr(0, 2), 16);
+      const g = parseInt(h.substr(2, 2), 16);
+      const b = parseInt(h.substr(4, 2), 16);
+      // Perceived luminance formula
+      return (r * 0.299 + g * 0.587 + b * 0.114) < 128;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('errorView');
+      const contentEl = document.getElementById('content');
+
+      if (!id) { loadingEl.style.display = 'none'; errorEl.style.display = 'block'; return; }
+
+      try {
+        const res = await fetch(`/api/works/${id}`);
+        if (!res.ok) throw new Error('Not found');
+        const work = await res.json();
+
+        // Apply page background color
+        if (work.bgColor && work.bgColor !== '#ffffff') {
+          document.body.style.background = work.bgColor;
+          document.querySelector('.subpage') && (document.querySelector('.subpage').style.background = work.bgColor);
+          // Auto-detect if it's a dark background and switch text color
+          const isDark = isDarkColor(work.bgColor);
+          if (isDark) {
+            document.body.style.color = '#f0f0f0';
+            document.body.classList.add('dark-bg');
+          }
+        }
+        // Title divider line (the small bar under the title) — off by default, opt-in per work.
+        if (work.titleDivider) document.body.classList.add('has-title-divider');
+
+        // Manual page text color overrides auto-detection
+        if (work.textColor && /^#[0-9a-fA-F]{6}$/.test(work.textColor)) {
+          document.body.style.color = work.textColor;
+          // Force-apply to common children so existing CSS doesn't fight us
+          const styleEl = document.createElement('style');
+          styleEl.textContent = `
+            .work-detail__title, .work-detail__text, .work-detail__caption,
+            .work-detail__subtitle, h1, h2, h3, h4, p, blockquote { color: ${work.textColor} !important; }
+            .work-detail__title::after { background: ${work.textColor} !important; }
+          `;
+          document.head.appendChild(styleEl);
+        }
+
+        const plainTitle = stripFormatting(work.title || '');
+        document.title = `${plainTitle} — Manoj Jacob`;
+
+        // Tags now live on the same width/align grid as content blocks. "Wide + left" tags
+        // hug the same left edge as a "Wide + left" image block beneath them.
+        const tagsAlign = ['left','center','right'].includes(work.tagsAlign) ? work.tagsAlign : 'center';
+        const tagsJustify = tagsAlign === 'left' ? 'flex-start' : tagsAlign === 'right' ? 'flex-end' : 'center';
+        let tagsHtml = '';
+        if (work.tags && work.tags.length > 0) {
+          tagsHtml = `<div class="work-detail__tags fade-in work-detail__block work-detail__block--w-wide work-detail__block--a-${tagsAlign}" style="margin-top:-10px; margin-bottom:30px; display:flex; flex-wrap:wrap; gap:8px; justify-content:${tagsJustify};">
+            ${work.tags.map(t => `<span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #555; background: #f0f0f0; padding: 4px 10px; border-radius: 4px;">${escHtml(stripTags(t))}</span>`).join('')}
+          </div>`;
+        }
+
+        const subtitle = stripTags(work.subtitle || '');
+        const subtitleAlign = ['left','center','right'].includes(work.subtitleAlign) ? work.subtitleAlign : 'center';
+        const subtitleSize = ['s','m','l'].includes(work.subtitleSize) ? work.subtitleSize : 'm';
+        const subFont = subtitleSize === 's' ? 'clamp(0.85rem,1.2vw,0.95rem)'
+                     : subtitleSize === 'l' ? 'clamp(1.2rem,2vw,1.5rem)'
+                     : 'clamp(1rem,1.6vw,1.15rem)';
+        // Subtitle uses the same width/align block grid. "Wide + left" subtitle = same left edge
+        // as a "Wide + left" content block. The text-align inside still controls how the text
+        // flows within that block (so a "Wide + center" subtitle centers within its column).
+        // Subtitle font: if user picked one in admin, use it; otherwise default to Gotham Book.
+        const subtitleFontFamily = (work.subtitleFont || "'Gotham Book',serif").replace(/"/g, "'");
+        const subtitleHtml = subtitle
+          ? `<p class="work-detail__subtitle fade-in work-detail__block work-detail__block--w-wide work-detail__block--a-${subtitleAlign}" style="text-align:${subtitleAlign}; margin-top:-30px; margin-bottom:36px; font-family:${subtitleFontFamily}; font-size:${subFont}; line-height:1.55; color:#666;">${escHtml(subtitle)}</p>`
+          : '';
+
+        // Title alignment: wrap the h1 in a flex/text-align container so the title's horizontal
+        // position is controlled by titleAlign — and the divider line (when on) follows the title.
+        const titleAlign = ['left','center','right'].includes(work.titleAlign) ? work.titleAlign : 'center';
+        const titleH1Class = work.titleDivider ? 'is-inline' : '';
+        let html = `<div class="work-detail__title-wrap fade-in" data-align="${titleAlign}"><h1 class="work-detail__title ${titleH1Class}">${formatText(work.title)}</h1></div>${subtitleHtml}${tagsHtml}`;
+
+        const blockMods = (block, fallbackW) => {
+          const w = ['narrow','wide','full'].includes(block.width) ? block.width : fallbackW;
+          const a = ['left','center','right'].includes(block.align) ? block.align : 'center';
+          return `work-detail__block--w-${w} work-detail__block--a-${a}`;
+        };
+
+        // Group adjacent blocks marked inRow:true with their preceding block.
+        // Each group renders as a single block, or as a side-by-side flex row when length > 1.
+        const groups = [];
+        (work.content || []).forEach((block, idx) => {
+          if (idx > 0 && block.inRow && groups.length > 0) {
+            groups[groups.length - 1].push(block);
+          } else {
+            groups.push([block]);
+          }
+        });
+
+        // Helper: render one block to its HTML string (same code as before, just extracted).
+        function renderBlockHTML(block) {
+          if (block.type === 'text') {
+            // Single-container rendering with white-space: pre-wrap on .work-detail__text
+            // preserves the user's whitespace EXACTLY — blank lines, multiple spaces, tabs,
+            // indentation — and still wraps responsively on narrow screens.
+            //
+            // Pre-process steps before formatText:
+            // 1) Multi-line [ALIGN:…][/ALIGN] → real <div style="text-align:…">. Each gets
+            //    its own pre-wrap so spacing inside aligned paragraphs is preserved too.
+            // 2) Lines that are ONLY a YouTube/Vimeo/image URL → swap with embed/image markup.
+            let raw = (block.value || '').replace(/\[ALIGN:(left|center|right|justify)\]([\s\S]*?)\[\/ALIGN\]/g, (m, align, content) => {
+              return `<div style="text-align:${align}; white-space:pre-wrap;">${(content || '').replace(/\n+/g, '<br>') || '&nbsp;'}</div>`;
+            });
+            // URL-only lines → embeds (must work BEFORE formatText so [B][I] tags inside same
+            // line don't confuse the URL detection).
+            raw = raw.replace(/(^|\n)[ \t]*(https?:\/\/[^\s<]+)[ \t]*(?=\n|$)/g, (m, lead, url) => {
+              const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+              const vm = url.match(/(?:vimeo\.com)\/(\d+)/);
+              const img = url.match(/\.(jpg|jpeg|png|gif|webp|svg|avif)(\?.*)?$/i);
+              if (yt) return lead + `<div class="video-container" style="margin: 20px 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe src="https://www.youtube.com/embed/${yt[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+              if (vm) return lead + `<div class="video-container" style="margin: 20px 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe src="https://player.vimeo.com/video/${vm[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+              if (img) return lead + `<div style="margin: 20px 0;"><img src="${url}" class="work-detail__image" data-lightbox="1" alt="External image"></div>`;
+              return m;
+            });
+            // Run formatText on the whole thing so bracket-tag formatting (B/I/U/colors/headings)
+            // works across line boundaries too.
+            const formatted = formatText(raw);
+            return `<div class="work-detail__block work-detail__block--text ${blockMods(block, 'narrow')}"><div class="work-detail__text">${formatted}</div></div>`;
+          }
+          if (block.type === 'image' && block.src) {
+            const cap = stripTags(block.caption || '');
+            let h = `<div class="work-detail__block work-detail__block--media ${blockMods(block, 'wide')}"><img class="work-detail__image" src="${block.src}" data-lightbox="1" alt="${escHtml(plainTitle)}" loading="lazy">`;
+            if (cap) h += `<p class="work-detail__caption">${escHtml(cap)}</p>`;
+            h += `</div>`;
+            return h;
+          }
+          if (block.type === 'gallery' && Array.isArray(block.images) && block.images.length) {
+            const cols = [2, 3, 4].includes(block.columns) ? block.columns : 3;
+            const fitMode = block.fit === 'natural' ? 'natural' : 'fit';
+            const items = block.images.filter(i => i.src).map(img => {
+              const cap = stripTags(img.caption || '');
+              return `
+              <div class="work-detail__gallery-item">
+                <img src="${img.src}" data-lightbox="1" alt="${escHtml(cap || plainTitle)}" loading="lazy">
+                ${cap ? `<p class="work-detail__gallery-caption">${escHtml(cap)}</p>` : ''}
+              </div>`;
+            }).join('');
+            return `<div class="work-detail__block work-detail__block--gallery ${blockMods(block, 'wide')}"><div class="work-detail__gallery work-detail__gallery--${fitMode} cols-${cols}">${items}</div></div>`;
+          }
+          if (block.type === 'video') {
+            const url = block.url || '';
+            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            const vmMatch = url.match(/(?:vimeo\.com)\/(\d+)/);
+            const mods = blockMods(block, 'wide');
+            if (ytMatch) return `<div class="work-detail__block work-detail__block--media ${mods}"><div class="video-container" style="margin: 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:6px;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>`;
+            if (vmMatch) return `<div class="work-detail__block work-detail__block--media ${mods}"><div class="video-container" style="margin: 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:6px;"><iframe src="https://player.vimeo.com/video/${vmMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div></div>`;
+            return '';
+          }
+          if (block.type === 'quote') {
+            const qFont = (block.font || "'Gotham',serif").replace(/"/g, "'");
+            const qText = stripTags(block.text || '');
+            const qAttr = stripTags(block.attr || '');
+            return `<div class="work-detail__block work-detail__block--text ${blockMods(block, 'narrow')}"><blockquote style="font-family:${qFont}; font-size:1.6rem; font-weight:300; line-height:1.4; border-left:4px solid currentColor; padding-left:20px; margin:40px 0;">"${escHtml(qText)}"${qAttr ? `<br><span style="font-size:1rem; font-weight:400; color:#666; margin-top:10px; display:inline-block;">— ${escHtml(qAttr)}</span>` : ''}</blockquote></div>`;
+          }
+          if (block.type === 'divider') {
+            const mods = blockMods(block, 'wide');
+            if (block.style === 'spacer') return `<div class="work-detail__block ${mods}" style="height:60px;"></div>`;
+            return `<div class="work-detail__block ${mods}"><hr style="border:0; border-top:1px ${block.style} #ddd; margin:40px 0;"></div>`;
+          }
+          if (block.type === 'label') {
+            const lFont = (block.font || "'Inter',sans-serif").replace(/"/g, "'");
+            const lText = stripTags(block.text || '');
+            return `<div class="work-detail__block work-detail__block--text ${blockMods(block, 'narrow')}"><h5 style="font-family:${lFont}; font-weight:600; font-size:0.85rem; letter-spacing:2px; text-transform:uppercase; color:#888; margin:60px 0 20px 0; border-bottom:1px solid #eee; padding-bottom:10px;">${escHtml(lText)}</h5></div>`;
+          }
+          return '';
+        }
+
+        // Render groups: single → as-is, multi → flex row of equal-width items.
+        groups.forEach(group => {
+          if (group.length === 1) {
+            html += renderBlockHTML(group[0]);
+            return;
+          }
+          const inner = group.map(b => `<div class="work-detail__row-item">${renderBlockHTML(b)}</div>`).join('');
+          html += `<div class="work-detail__row work-detail__block work-detail__block--w-full work-detail__block--a-center" data-cols="${group.length}">${inner}</div>`;
+        });
+
+        loadingEl.style.display = 'none';
+        contentEl.innerHTML = html;
+        contentEl.style.display = 'block';
+
+        // Animate blocks in
+        const blocks = contentEl.querySelectorAll('.work-detail__block, .fade-in');
+        blocks.forEach((el, i) => {
+          setTimeout(() => el.classList.add('visible'), 100 + i * 120);
+        });
+
+        // Lightbox with zoom + pan + keyboard shortcuts.
+        const lightbox      = document.getElementById('lightbox');
+        const lightboxImg   = document.getElementById('lightboxImg');
+        const zoomLabel     = document.getElementById('lightboxZoomLabel');
+        const zoomInBtn     = document.getElementById('lightboxZoomIn');
+        const zoomOutBtn    = document.getElementById('lightboxZoomOut');
+        const zoomResetBtn  = document.getElementById('lightboxZoomReset');
+        let zoom = 1, panX = 0, panY = 0;
+
+        function applyZoom() {
+          lightboxImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+          lightboxImg.classList.toggle('is-zoomed', zoom > 1);
+          zoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+        function setZoom(z) {
+          zoom = Math.max(0.25, Math.min(4, z));
+          if (zoom === 1) { panX = 0; panY = 0; }
+          applyZoom();
+        }
+        function openLightbox(src, alt) {
+          lightboxImg.src = src;
+          lightboxImg.alt = alt || '';
+          zoom = 1; panX = 0; panY = 0;
+          applyZoom();
+          lightbox.classList.add('is-open');
+          // Tell the parent (work.html modal wrapper) to hide its own X close button while
+          // the lightbox is open — otherwise it sits on top of the iframe at top-right and
+          // users hit it expecting to close just the image.
+          try { window.parent && window.parent.postMessage({ type: 'lightbox', open: true }, '*'); } catch (_) {}
+          // Push history state so the browser Back button closes the lightbox first
+          // (instead of leaving the parent page in a broken state).
+          try { history.pushState({ lightbox: true }, ''); } catch (_) {}
+        }
+        function closeBox(fromHistory = false) {
+          if (!lightbox.classList.contains('is-open')) return;
+          lightbox.classList.remove('is-open');
+          // Reset transform so reopening starts fresh
+          zoom = 1; panX = 0; panY = 0; applyZoom();
+          // Restore parent's close button
+          try { window.parent && window.parent.postMessage({ type: 'lightbox', open: false }, '*'); } catch (_) {}
+          // If user closed via X / Esc, pop the lightbox state we pushed
+          if (!fromHistory) { try { history.back(); } catch (_) {} }
+        }
+
+        contentEl.querySelectorAll('img[data-lightbox]').forEach(img => {
+          img.addEventListener('click', () => openLightbox(img.currentSrc || img.src, img.alt));
+        });
+
+        // Click backdrop / close button → close (but not when clicking the image or controls)
+        lightbox.addEventListener('click', e => {
+          if (e.target === lightbox || e.target === lightbox.querySelector('.lightbox__viewport')) closeBox();
+        });
+        document.getElementById('lightboxClose').addEventListener('click', e => { e.stopPropagation(); closeBox(); });
+
+        // Zoom buttons
+        zoomInBtn.addEventListener('click', () => setZoom(zoom + 0.25));
+        zoomOutBtn.addEventListener('click', () => setZoom(zoom - 0.25));
+        zoomResetBtn.addEventListener('click', () => setZoom(1));
+
+        // Wheel = zoom; only when lightbox open and over the image
+        lightbox.addEventListener('wheel', e => {
+          if (!lightbox.classList.contains('is-open')) return;
+          e.preventDefault();
+          setZoom(zoom + (e.deltaY < 0 ? 0.15 : -0.15));
+        }, { passive: false });
+
+        // Drag-to-pan when zoomed in
+        let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+        lightboxImg.addEventListener('pointerdown', e => {
+          if (zoom <= 1) return;
+          dragging = true;
+          dragStartX = e.clientX; dragStartY = e.clientY;
+          panStartX = panX; panStartY = panY;
+          lightboxImg.setPointerCapture(e.pointerId);
+        });
+        lightboxImg.addEventListener('pointermove', e => {
+          if (!dragging) return;
+          panX = panStartX + (e.clientX - dragStartX);
+          panY = panStartY + (e.clientY - dragStartY);
+          applyZoom();
+        });
+        lightboxImg.addEventListener('pointerup', e => {
+          dragging = false;
+          try { lightboxImg.releasePointerCapture(e.pointerId); } catch (_) {}
+        });
+
+        // Keyboard: Esc to close, +/- to zoom, 0 to reset
+        document.addEventListener('keydown', e => {
+          if (!lightbox.classList.contains('is-open')) return;
+          if (e.key === 'Escape')          { e.preventDefault(); closeBox(); }
+          else if (e.key === '+' || e.key === '=') { e.preventDefault(); setZoom(zoom + 0.25); }
+          else if (e.key === '-' || e.key === '_') { e.preventDefault(); setZoom(zoom - 0.25); }
+          else if (e.key === '0')          { e.preventDefault(); setZoom(1); }
+        });
+
+        // Browser Back button: if lightbox is open, close it instead of leaving the page.
+        window.addEventListener('popstate', e => {
+          if (lightbox.classList.contains('is-open')) closeBox(true);
+        });
+
+      } catch (e) {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+      }
+    });
+
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+    // Strip raw HTML tags from a plain-text field. Belt-and-braces: the server already cleans
+    // these on save, but works saved before the cleanup may still have <span> markup baked in.
+    function stripTags(str) {
+      if (typeof str !== 'string') return '';
+      return str.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    }
+  </script>
+
+</body>
+</html>
