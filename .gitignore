@@ -1,0 +1,24 @@
+# Dependencies — re-install with `npm install`
+node_modules/
+
+# Local environment overrides (keep secrets out of git)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Log + diagnostic output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SQLite write-ahead / journal files (keep works.db, exclude the transient ones)
+data/works.db-journal
+data/works.db-wal
+data/works.db-shm
